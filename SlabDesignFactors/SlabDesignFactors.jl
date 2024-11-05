@@ -13,7 +13,7 @@ Nonconvex.@load MMA
 Nonconvex.@load NLopt
 
 # Include necessary modules for slab analysis and optimization
-include("../TributaryAreas/_TributaryAreas.jl")  # Ensure this file is correctly formatted and exists
+include("../TributaryAreas/TributaryAreas.jl")  # Ensure this file is correctly formatted and exists
 include("../VariableBeamOptimizer/VariableBeamOptimizer.jl")
 
 Pkg.status()

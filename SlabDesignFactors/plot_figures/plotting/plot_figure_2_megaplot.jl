@@ -1,0 +1,215 @@
+include("_results.jl")
+
+begin
+    CairoMakie.activate!()
+    fig = Figure(size=(190*4,250*4));
+
+    # figure settings
+    alpha = 0.8
+    alpha_fade = 0.5
+    transparency = true
+    markersize = 5
+    markersize_zoom = 7
+    fontsize = 11
+    smallfontsize = 8
+
+    # legends
+    elem_grey = MarkerElement(color = :lightgrey, marker = :circle)
+    elem_selected = MarkerElement(color = 色[:magenta], marker = :circle)
+
+    elem_isotropic = MarkerElement(color = 色[:skyblue], marker = :star8)
+    elem_orthogonal = MarkerElement(color = 色[:irispurple], marker = :cross)
+    elem_uniaxial = MarkerElement(color = 色[:magenta], marker = :hline)
+
+    elem_t = MarkerElement(color = 色[:magenta], marker = :circle)
+    elem_g = MarkerElement(color = 色[:lilac], marker = :circle)
+    elem_s = MarkerElement(color = 色[:irispurple], marker = :circle)
+
+    elem_concrete = MarkerElement(color = 色[:charcoalgrey], marker = :circle)
+    elem_steel = MarkerElement(color = 色[:skyblue], marker = :circle)
+    elem_rebar = MarkerElement(color = 色[:magenta], marker = :circle)
+
+    # grid
+    grid = fig[1,1] = GridLayout()
+    gradient_grid = grid[2,1] = GridLayout()
+
+    # import CSVs
+    df_all = csv_2_df(["3_grasshopper_slabs_topology/", "3_grasshopper_slabs_grid/", "3_grasshopper_slabs_nova_start/", "3_grasshopper_slabs_nova_end/"], categories=["t","g","s","s"])
+    df_all = filter(row -> !isnan(row.total_ec), df_all)
+
+    max_steel = maximum(df_all.steel_ec) * 1.25
+    max_slab = maximum(df_all.slab_ec) * 1.25
+    
+    # pick out the individuals, starting with business as usual
+    filter_function = row -> row.name == "r1c2" && row.slab_type == "uniaxial" && row.slab_sizer == "uniform" && row.beam_sizer == "discrete" && row.collinear == true && row.vector_1d_x == 1 && row.vector_1d_y == 0 && row.max_depth == 40
+    business_as_usual = filter(filter_function, df_all)
+
+    bau_steel = business_as_usual.steel_ec[1]
+    bau_slab = business_as_usual.slab_ec[1]
+
+    color_filter = row -> row.beam_sizer == "discrete" && row.collinear == true && row.max_depth == 25 && row.slab_sizer == "uniform"
+    df_grey = filter(!color_filter, df_all)
+    df_color = filter(color_filter, df_all)
+
+    # separate larger and smaller than
+    filter_function = row -> row.steel_ec + row.slab_ec > bau_steel + bau_slab
+
+    greater_than_bau_grey = filter(filter_function, df_grey)
+    less_than_bau_grey = filter(!filter_function, df_grey)
+    greater_than_bau_color = filter(filter_function, df_color)
+    less_than_bau_color = filter(!filter_function, df_color)
+
+    less_than_bau= filter(!filter_function, df_all)
+
+    # megaplot -- less than
+    ax1 = Axis(grid[1,1], title = "a) Full Dataset", xlabel = "EC steel kgCO2e/m²", ylabel = "EC RC-slab kgCO2e/m²", limits=(0,125,0,70), yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize=fontsize);
+
+    x_lim_min = minimum(less_than_bau.steel_ec)
+    y_lim_min = minimum(less_than_bau.slab_ec)
+
+    ax2 = Axis(gradient_grid[1,1], title = "b) Element density (inset)", xlabel = "EC steel kgCO2e/m²", ylabel = "EC RC-slab kgCO2e/m²", yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize=fontsize);
+    axislegend(ax1, [elem_t, elem_g, elem_s, elem_grey], ["Topology", "Grid", "Star", "Non-standard"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor = :white, labelsize=9, patchsize = (2,10), padding=(0,0,0,0))
+    #axislegend(ax2, [elem_t, elem_g, elem_s, elem_grey], ["Topology", "Grid", "Star", "Continuous"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor = :white, labelsize=9, patchsize = (2,10), padding=(0,0,0,0))
+
+    ax3 = Axis(grid[1:2,2], title = "c) Ranked EC", xlabel = "EC kgCO2e/m²", limits=(0,nothing,0,length(df_all.name)), yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize=fontsize);
+
+    rowsize!(grid,2,Relative(1/3))
+    colsize!(grid,1,Relative(4/5))
+    rowgap!(grid, 10)
+
+    # plot greater than
+    filter_function = row -> row.category == "t"
+    df_topology = filter(filter_function, greater_than_bau_color)
+    filter_function = row -> row.category == "g"
+    df_grid = filter(filter_function, greater_than_bau_color)
+    filter_function = row -> row.category == "s"
+    df_star = filter(filter_function, greater_than_bau_color)
+
+    scatter!(ax1, greater_than_bau_grey.steel_ec, greater_than_bau_grey.slab_ec, marker=greater_than_bau_grey.symbol, rotation=greater_than_bau_grey.rotation, color=(:lightgrey,alpha_fade), transparency = false, markersize=markersize, inspector_label = (self, i, p) -> greater_than_bau_grey.rowcol[i])
+
+    scatter!(ax1, df_topology.steel_ec, df_topology.slab_ec, marker=df_topology.symbol, rotation=df_topology.rotation, color=(色[:magenta],alpha_fade), transparency = false, markersize=markersize, inspector_label = (self, i, p) -> df_topology.rowcol[i])
+    scatter!(ax1, df_grid.steel_ec, df_grid.slab_ec, marker=df_grid.symbol, rotation=df_grid.rotation, color=(色[:lilac],alpha_fade), transparency = false, markersize=markersize, inspector_label = (self, i, p) -> df_grid.rowcol[i])
+    scatter!(ax1, df_star.steel_ec, df_star.slab_ec, marker=df_star.symbol, rotation=df_star.rotation, color=(色[:irispurple],alpha_fade), transparency = false, markersize=markersize, inspector_label = (self, i, p) -> df_star.rowcol[i])
+
+    # plot less than
+    filter_function = row -> row.category == "t"
+    df_topology = filter(filter_function, less_than_bau_color)
+    filter_function = row -> row.category == "g"
+    df_grid = filter(filter_function, less_than_bau_color)
+    filter_function = row -> row.category == "s"
+    df_star = filter(filter_function, less_than_bau_color)
+
+    scatter!(ax1, less_than_bau_grey.steel_ec, less_than_bau_grey.slab_ec, marker=less_than_bau_grey.symbol, rotation=less_than_bau_grey.rotation, color=(:lightgrey,alpha), transparency = false, markersize=markersize, inspector_label = (self, i, p) -> less_than_bau_grey.rowcol[i])
+
+    scatter!(ax1, df_topology.steel_ec, df_topology.slab_ec, marker=df_topology.symbol, rotation=df_topology.rotation, color=(色[:magenta],alpha), transparency = transparency, markersize=markersize, inspector_label = (self, i, p) -> df_topology.rowcol[i])
+    scatter!(ax1, df_grid.steel_ec, df_grid.slab_ec, marker=df_grid.symbol, rotation=df_grid.rotation, color=(色[:lilac],alpha), transparency = transparency, markersize=markersize, inspector_label = (self, i, p) -> df_grid.rowcol[i])
+    scatter!(ax1, df_star.steel_ec, df_star.slab_ec, marker=df_star.symbol, rotation=df_star.rotation, color=(色[:irispurple],alpha), transparency = transparency, markersize=markersize, inspector_label = (self, i, p) -> df_star.rowcol[i])
+
+    # plot the same on ax2
+    ax2.limits = (0, bau_steel * 1.1, 20, bau_slab * 1.1)
+
+    filter_function = row -> row.category == "t"
+    df_topology = filter(filter_function, less_than_bau_color)
+    filter_function = row -> row.category == "g"
+    df_grid = filter(filter_function, less_than_bau_color)
+    filter_function = row -> row.category == "s"
+    df_star = filter(filter_function, less_than_bau_color)
+
+    scatter!(ax2, less_than_bau_grey.steel_ec, less_than_bau_grey.slab_ec, marker=less_than_bau_grey.symbol, rotation=less_than_bau_grey.rotation, color=(:lightgrey,alpha), transparency = false, markersize=markersize_zoom, inspector_label = (self, i, p) -> less_than_bau_grey.rowcol[i])
+    scatter!(ax2, df_topology.steel_ec, df_topology.slab_ec, marker=df_topology.symbol, rotation=df_topology.rotation, color=(:lightgrey,alpha), transparency = false, markersize=markersize_zoom, inspector_label = (self, i, p) -> df_topology.rowcol[i])
+
+    n_elements_grid = [length(df_grid[i,:].ids) for i in 1:lastindex(df_grid.name)]
+    n_elements_star = [length(df_star[i,:].ids) for i in 1:lastindex(df_star.name)]
+
+    scatter!(ax2, df_grid.steel_ec, df_grid.slab_ec, marker=df_grid.symbol, rotation=df_grid.rotation, color = n_elements_grid, colormap = Reverse(:acton), colorrange = (0,maximum(n_elements_grid)), transparency = false, markersize=markersize_zoom, inspector_label = (self, i, p) -> df_grid.rowcol[i])
+    scatter!(ax2, df_star.steel_ec, df_star.slab_ec, marker=df_star.symbol, rotation=df_star.rotation, color = n_elements_star, colormap = Reverse(:devon), colorrange = (0,maximum(n_elements_star)), transparency = false, markersize=markersize_zoom, inspector_label = (self, i, p) -> df_star.rowcol[i])
+
+    Colorbar(gradient_grid[1,2], limits = (0, maximum(n_elements_grid)), colormap = Reverse(:acton), ticklabelsize=smallfontsize, labelsize=smallfontsize, label="# grid elements", ticklabelrotation=pi/2)
+    Colorbar(gradient_grid[1,3], limits = (0, maximum(n_elements_star)), colormap = Reverse(:devon), ticklabelsize=smallfontsize, labelsize=smallfontsize, label="# star elements", ticklabelrotation=pi/2)
+
+    """filter_function = row -> row.rowcol == "s[6,6]"
+    df_selected = filter(filter_function, df_all)
+    scatter!(ax2, df_selected.steel_ec, df_selected.slab_ec, marker=df_selected.symbol, rotation=df_selected.rotation, color=:green, transparency = false, markersize=markersize, inspector_label = (self, i, p) -> df_selected.rowcol[i])
+    """
+
+    # plot business as usual
+    scatter!(ax1, bau_steel, bau_slab, marker=business_as_usual.symbol, transparency = transparency, markersize=markersize, rotation=business_as_usual.rotation, color=:black, inspector_label = (self, i, p) -> business_as_usual.rowcol[i])
+    
+    vlines!(ax1, bau_steel, color = :black, linestyle = :dash, linewidth = 1)
+    hlines!(ax1, bau_slab, color = :black, linestyle = :dash, linewidth = 1)
+    lines!(ax1, [bau_slab + bau_steel, 0], [0, bau_slab + bau_steel], color = :black, linestyle = :dash, linewidth = 1)
+
+    vlines!(ax2, bau_steel, color = :black, linestyle = :dash, linewidth = 1)
+    hlines!(ax2, bau_slab, color = :black, linestyle = :dash, linewidth = 1)
+    lines!(ax2, [bau_slab + bau_steel, 0], [0, bau_slab + bau_steel], color = :black, linestyle = :dash, linewidth = 1)
+
+    # iso-EC lines
+    ec_lines = collect(range(1,maximum(df_all.total_ec)/10)) .* 10
+    
+    for i in 1:lastindex(ec_lines)
+
+        text!(ax1, 0, ec_lines[i], text="$(Int(ec_lines[i]))", align=(:left, :center), offset = (10, 0), color=:lightgrey, fontsize = smallfontsize)
+        text!(ax2, 0, ec_lines[i], text="$(Int(ec_lines[i]))", align=(:left, :center), offset = (10, 0), color=:lightgrey, fontsize = smallfontsize)
+        
+        if ec_lines[i] <= bau_steel + bau_slab
+            lines!(ax1, [0,ec_lines[i]], [ec_lines[i],0], color = ec_lines[i], colormap=(Reverse(:grays),0.25), colorrange=(0,bau_steel + bau_slab), linestyle = :dash, linewidth = 1)
+            lines!(ax2, [0,ec_lines[i]], [ec_lines[i],0], color = ec_lines[i], colormap=(Reverse(:grays),0.25), colorrange=(0,bau_steel + bau_slab), linestyle = :dash, linewidth = 1)
+        else
+            lines!(ax1, [0,ec_lines[i]], [ec_lines[i],0], color = ec_lines[i], colormap=(:grays,0.25), colorrange=(bau_steel + bau_slab,maximum(ec_lines)), linestyle = :dash, linewidth = 1)
+            lines!(ax2, [0,ec_lines[i]], [ec_lines[i],0], color = ec_lines[i], colormap=(:grays,0.25), colorrange=(bau_steel + bau_slab,maximum(ec_lines)), linestyle = :dash, linewidth = 1)
+        end
+    end
+
+    """
+    BARPLOT
+    """
+
+    #!!!!!# barplot
+
+    sort!(df_all, order(:total_ec))
+
+    df_less_than = copy(df_all)
+
+    for i in 1:lastindex(df_less_than.name)
+        row = df_less_than[i,:]
+        if row.total_ec > bau_steel + bau_slab
+            row.steel_ec = 0 
+            row.concrete_ec = 0
+            row.rebar_ec = 0
+            row.slab_ec = 0
+            row.total_ec = 0
+        end
+    end
+    
+    dfs = [df_all, df_less_than]
+    alphas = [0.1, 1]
+
+    for i in 1:lastindex(dfs)
+
+        df = dfs[i]
+        a = alphas[i]
+
+        positions = 1:lastindex(df.area)
+        stack = repeat(positions,inner=3)
+        categories = repeat(positions,outer=3)
+        colours = repeat([1,2,3],inner=lastindex(df.area))
+
+        df_concrete = df.concrete_ec
+        df_steel = df.steel_ec
+        df_rebar = df.rebar_ec
+
+        data_barplot = vcat(df_concrete, df_steel, df_rebar)
+
+        barplot!(ax3, categories, data_barplot, stack=stack, gap=0, color=colours, direction=:x, colormap = [(色[:charcoalgrey],a), (色[:skyblue],a), (色[:magenta],a)])
+
+    end
+
+    axislegend(ax3, [elem_rebar, elem_steel, elem_concrete], ["Rebar", "Steel", "Concrete"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor = :white, labelsize=smallfontsize, patchsize = (2,10), padding=(0,0,0,0))
+
+    di = DataInspector(fig)
+
+    # display
+    display(fig)
+    save("figures/megaplot.pdf", fig)
+
+end
