@@ -12,10 +12,6 @@
 .*webp
 .*svg
 
-Tributary Areas/results/results_files
-Tributary Areas/gh/
-Tributary Areas/assets/
-Tributary Areas/special_jsons/
-Tributary Areas/parametric_jsons/
-Tributary Areas/geometry_jsons/
-Tributary Areas/revised_jsons/
+Paper
+SlabDesignFactors/results
+SlabDesignFactors/jsons
