@@ -21,6 +21,10 @@ Pkg.add("StatsBase")
 Pkg.add("UnPack")
 Pkg.add("Zygote")
 
+# Redirect to local directories
+Pkg.develop(path="./AsapToolkit")
+Pkg.develop(path="./AsapOptim")
+
 # Resolve and precompile packages
 Pkg.resolve()
 Pkg.precompile()

@@ -13,8 +13,6 @@ Nonconvex.@load MMA
 Nonconvex.@load NLopt
 
 # Include necessary modules for slab analysis and optimization
-Pkg.develop(path="./AsapToolkit")
-Pkg.develop(path="./AsapOptim")
 include("../TributaryAreas/_TributaryAreas.jl")  # Ensure this file is correctly formatted and exists
 include("../VariableBeamOptimizer/VariableBeamOptimizer.jl")
 
