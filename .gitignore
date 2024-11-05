@@ -1,0 +1,21 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+*.json
+*.csv
+.*pdf
+.*ai
+.*png
+.*jpg
+.*jpeg
+.*gif
+.*bmp
+.*tiff
+.*webp
+.*svg
+
+Tributary Areas/results/results_files
+Tributary Areas/gh/
+Tributary Areas/assets/
+Tributary Areas/special_jsons/
+Tributary Areas/parametric_jsons/
+Tributary Areas/geometry_jsons/
+Tributary Areas/revised_jsons/
