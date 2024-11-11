@@ -22,7 +22,7 @@ begin
     # Define the path to the JSON file containing slab geometry
     main_path = "SlabDesignFactors/jsons/topology/"  # Update this path as needed
     sub_paths = filter(x -> endswith(x, ".json"), readdir(main_path))
-    sub_path = sub_paths[1]
+    sub_path = "r1c1.json"
     path = main_path * sub_path
     name = replace(sub_path, ".json" => "")
 
@@ -50,7 +50,7 @@ begin
                         vector_1d=vector_1d, 
                         spacing=.1, 
                         w=load_kNm2, 
-                        plot_analysis=false,
+                        plot_analysis=true,
                         fix_param=true, 
                         slab_sizer=slab_sizer, 
                         beam_sizer=beam_sizer, 
@@ -80,6 +80,6 @@ begin
         println(result.collinear)
     end
 
-    save_results(results, subfolder = "SlabDesignFactors/results/test_results", filename = "test_design_variations")
+    save_results(results, subfolder = "SlabDesignFactors/results/test_results", filename = "test_improve_deflection")
 
 end
