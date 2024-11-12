@@ -56,7 +56,7 @@ begin
                         beam_sizer=beam_sizer, 
                     );
 
-                    beam_sizing_params = BeamSizingParams(
+                    beam_sizing_params = SlabSizingParams(
                         max_depth=max_depth, 
                         sizing_unit=:in, 
                         deflection_limit=true, 
