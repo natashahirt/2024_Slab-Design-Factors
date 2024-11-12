@@ -34,7 +34,7 @@ ibm_colors = Dict(
 )
 
 # EXTRACT THE ROTATION OF THE SYMBOL
-function get_vector_1d_angle(vector_1d::Vector{Float64}; degrees=false, clockwise=false)
+function get_vector_1d_angle(vector_1d::Vector{<:Real}; degrees=false, clockwise=false)
 
     angle = atan(vector_1d[2], vector_1d[1]) # counterclockwise
 

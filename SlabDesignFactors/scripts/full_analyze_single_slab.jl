@@ -15,9 +15,9 @@ begin
     # Define slab parameters
     slab_types = [:isotropic, :orth_biaxial, :orth_biaxial, :uniaxial, :uniaxial, :uniaxial, :uniaxial]         # Slab types
     vector_1ds = [[1.0, 0.0,], [1.0, 0.0,], [1.0, 1.0,], [1.0, 0.0,], [0.0, 1.0,], [1.0, 1.0,], [1.0, -1.0,]]    # Vectors
-    max_depths = [25, 40]
-    slab_sizers = [:cellular, :uniform]
-    beam_sizers = [:discrete, :continuous]
+    max_depths = [25] #, 40]
+    slab_sizers = [:cellular] #, :uniform]
+    beam_sizers = [:discrete] #, :continuous]
 
     # Define the path to the JSON file containing slab geometry
     main_path = "SlabDesignFactors/jsons/topology/"  # Update this path as needed
@@ -25,6 +25,8 @@ begin
     sub_path = "r1c1.json"
     path = main_path * sub_path
     name = replace(sub_path, ".json" => "")
+
+    path = "SlabDesignFactors/jsons/special/rhombus_8x12.json"  # Update this path as needed
 
     # Parse geometry from JSON
     geometry_dict = JSON.parse(JSON.parse(replace(read(path, String), "\\n" => ""), dicttype=Dict))
@@ -38,35 +40,38 @@ begin
 
             for beam_sizer in beam_sizers
 
-                for (i, slab_type) in enumerate([slab_types[1]])
+                for (i, slab_type) in enumerate(slab_types)
 
                     vector_1d = vector_1ds[i]
 
                     # Create and analyze the slab
                     slab_params = SlabAnalysisParams(
                         geometry, 
-                        slab_type, 
                         slab_name=name,
+                        slab_type=slab_type,
                         vector_1d=vector_1d, 
+                        slab_sizer=slab_sizer,
                         spacing=.1, 
-                        w=load_kNm2, 
                         plot_analysis=true,
-                        fix_param=true, 
-                        slab_sizer=slab_sizer, 
-                        beam_sizer=beam_sizer, 
+                        slab_units=:m
                     );
 
+                    # Sizing parameters
                     beam_sizing_params = SlabSizingParams(
-                        max_depth=max_depth, 
-                        sizing_unit=:in, 
-                        deflection_limit=true, 
-                        verbose=false, 
-                        minimum=false, 
-                        max_assembly_depth=true
-                    )
+                        live_load=50, # ksi
+                        superimposed_dead_load=15, # ksi
+                        live_factor=1.6,
+                        dead_factor=1.2,
+                        beam_sizer=:discrete,
+                        max_depth=25, # in
+                        beam_units=:in,
+                        serviceability_lim=360
+                    );
 
-                    iteration_result = iterate_discrete_continuous(slab_params, beam_sizing_params);
-                    append!(results, iteration_result)
+                    analyze_slab(slab_params)
+
+                    #iteration_result = iterate_discrete_continuous(slab_params, beam_sizing_params);
+                    #append!(results, iteration_result)
 
                 end
 
@@ -76,10 +81,10 @@ begin
 
     end
 
-    for result in results
+    """for result in results
         println(result.collinear)
     end
 
     save_results(results, subfolder = "SlabDesignFactors/results/test_results", filename = "test_improve_deflection")
-
+    """
 end

@@ -40,12 +40,12 @@ beam_sizing_params = SlabSizingParams(
     beam_sizer=:discrete,
     max_depth=25, # in
     beam_units=:in,
-    serviceability_lim=360.0
+    serviceability_lim=360
 );
 
 slab_params = analyze_slab(slab_params);  
 
-save("SlabDesignFactors/plot_figures/figures/tributary areas/orth_biaxial_1_1/r1c1.svg", slab_params.plot_context.fig)   
+#save("SlabDesignFactors/plot_figures/figures/tributary areas/orth_biaxial_1_1/r1c1.svg", slab_params.plot_context.fig)   
 
 slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
 
