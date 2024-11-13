@@ -1,15 +1,6 @@
 # clear the 0 numbers and replace with NaN
 cull(x) = (x isa Number && x == 0.) ? NaN : x
 
-# constants
-ρ_steel = 7850
-ρ_concrete = 2400
-ρ_rebar = 7850
-
-ECC_steel = 1.22
-ECC_concrete = 0.152
-ECC_rebar = 0.854
-
 # colours
 ibm_colors = Dict(
     :ibm_cornflower => colorant"#648fff",

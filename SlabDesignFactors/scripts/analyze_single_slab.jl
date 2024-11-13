@@ -8,6 +8,7 @@ CairoMakie.activate!()
 
 # Define the path to the JSON file containing slab geometry
 path = "SlabDesignFactors/jsons/special/rhombus_8x12.json"  # Update this path as needed
+path = "SlabDesignFactors/jsons/topology/r1c1.json"
 
 # Define slab parameters
 slab_type = :isotropic  # Example slab type
@@ -23,36 +24,49 @@ slab_params = SlabAnalysisParams(
     geometry, 
     slab_name=name,
     slab_type=:uniaxial,
-    vector_1d=[1,0], 
+    vector_1d=[0,1], 
     slab_sizer=:cellular,
     spacing=.1, 
     plot_analysis=true,
     fix_param=true, 
-    slab_units=:m
+    slab_units=:m,
 );
 
 # Sizing parameters
 beam_sizing_params = SlabSizingParams(
-    live_load=50, # ksi
-    superimposed_dead_load=15, # ksi
-    live_factor=1.6,
-    dead_factor=1.2,
-    beam_sizer=:discrete,
+    live_load=psf_to_ksi(50), # ksi
+    superimposed_dead_load=psf_to_ksi(15), # ksi
+    live_factor=1.6, # -
+    dead_factor=1.2, # -
+    beam_sizer=:continuous,
     max_depth=25, # in
-    beam_units=:in,
-    serviceability_lim=360
+    beam_units=:in, # in, etc.
+    serviceability_lim=360,
+    collinear=false,
+    minimum_continuous=true
 );
 
 slab_params = analyze_slab(slab_params);  
+
+slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear = iterate_discrete_continuous(slab_params, beam_sizing_params);
+save_results([slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear], subfolder = "SlabDesignFactors/results/test_results", filename = "test_redone")
 
 #save("SlabDesignFactors/plot_figures/figures/tributary areas/orth_biaxial_1_1/r1c1.svg", slab_params.plot_context.fig)   
 
 slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
 
+for (i,minimizer) in enumerate(beam_sizing_params.minimizers)
+    section = I_symm(minimizer...)
+    loads = beam_sizing_params.load_dictionary[get_element_id(beam_sizing_params.model.elements[:beam][i])]
+    load_values = [load.value[3] for load in loads]
+    if isempty(load_values)
+        load_values = 0
+    end
+    println("Sum of loads: $(sum(load_values))... A: $(section.A)")
+end
+
 slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
 println("Noncollinear:\n")
 print_forces(slab_results_discrete_noncollinear)
 
-slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear = iterate_discrete_continuous(slab_params, beam_sizing_params);
-
-save_results([slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear], subfolder = "SlabDesignFactors/results/test_results", filename = "positive_load_post")
+GC.gc()

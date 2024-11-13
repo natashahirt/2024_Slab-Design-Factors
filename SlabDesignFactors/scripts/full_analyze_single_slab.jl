@@ -70,6 +70,8 @@ begin
 
                     analyze_slab(slab_params)
 
+                    @assert length(slab_params.load_areas) == length(slab_params.load_volumes) == length(slab_params.model.loads) "Mismatch in load areas and volumes."
+
                     #iteration_result = iterate_discrete_continuous(slab_params, beam_sizing_params);
                     #append!(results, iteration_result)
 
