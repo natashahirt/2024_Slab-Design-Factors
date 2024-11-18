@@ -25,7 +25,7 @@ begin
     # Define the path to the JSON file containing slab geometry
     main_path = "SlabDesignFactors/jsons/topology/"  # Update this path as needed
     sub_paths = filter(x -> endswith(x, ".json"), readdir(main_path))
-
+    
     results = SlabOptimResults[]
 
     for max_depth in max_depths
@@ -43,6 +43,9 @@ begin
                         path = main_path * sub_path
                         name = replace(sub_path, ".json" => "")  
 
+                        println("================================================")
+                        println("$(name): $(slab_type) $(vector_1d) $(slab_sizer) $(beam_sizer)")
+
                         # Parse geometry from JSON
                         geometry_dict = JSON.parse(JSON.parse(replace(read(path, String), "\\n" => ""), dicttype=Dict))
                         geometry = generate_from_json(geometry_dict, plot=false, drawn=false);
@@ -50,27 +53,30 @@ begin
                         # Create and analyze the slab
                         slab_params = SlabAnalysisParams(
                             geometry, 
-                            slab_type, 
                             slab_name=name,
+                            slab_type=slab_type,
                             vector_1d=vector_1d, 
+                            slab_sizer=slab_sizer,
                             spacing=.1, 
-                            w=load_kNm2, 
                             plot_analysis=true,
                             fix_param=true, 
-                            slab_sizer=slab_sizer, 
-                            beam_sizer=beam_sizer, 
+                            slab_units=:m,
                         );
 
+                        # Sizing parameters
                         beam_sizing_params = SlabSizingParams(
-                            max_depth=max_depth, 
-                            sizing_unit=:in, 
-                            deflection_limit=true, 
-                            verbose=false, 
-                            minimum=false, 
-                            max_assembly_depth=true
-                        )
+                            live_load=psf_to_ksi(50), # ksi
+                            superimposed_dead_load=psf_to_ksi(15), # ksi
+                            live_factor=1.6, # -
+                            dead_factor=1.2, # -
+                            beam_sizer=beam_sizer,
+                            max_depth=max_depth, # in
+                            beam_units=:in, # in, etc.
+                            serviceability_lim=360,
+                            collinear=false,
+                            minimum_continuous=true
+                        );
 
-                        println("Slab: ", name)
                         iteration_result = iterate_discrete_continuous(slab_params, beam_sizing_params);
                         append!(results, iteration_result)
 
@@ -85,10 +91,10 @@ begin
 
     end
 
-    """for result in results
+    for result in results
         println(result.collinear)
     end
 
-    save_results(results, subfolder = "SlabDesignFactors/results/test_results", filename = "test_improved_deflection")
-"""
+    save_results(results, subfolder = "SlabDesignFactors/results/test_results", filename = "new_test_multi_slab_single_variation")
+
 end

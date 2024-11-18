@@ -8,12 +8,9 @@ CairoMakie.activate!()
 
 # Define the path to the JSON file containing slab geometry
 path = "SlabDesignFactors/jsons/special/rhombus_8x12.json"  # Update this path as needed
-path = "SlabDesignFactors/jsons/topology/r1c1.json"
+path = "SlabDesignFactors/jsons/topology/r9c4.json"
 
-# Define slab parameters
-slab_type = :isotropic  # Example slab type
-vector_1d = [1,1]      # Example vector
-name = "rhombus_8x12"               # Name for the plot
+name = basename(splitext(path)[1])    # Name for the plot
 
 # Parse geometry from JSON
 geometry_dict = JSON.parse(JSON.parse(replace(read(path, String), "\\n" => ""), dicttype=Dict))
@@ -23,7 +20,7 @@ geometry = generate_from_json(geometry_dict, plot=false, drawn=false);
 slab_params = SlabAnalysisParams(
     geometry, 
     slab_name=name,
-    slab_type=:uniaxial,
+    slab_type=:isotropic,
     vector_1d=[0,1], 
     slab_sizer=:cellular,
     spacing=.1, 
@@ -38,7 +35,7 @@ beam_sizing_params = SlabSizingParams(
     superimposed_dead_load=psf_to_ksi(15), # ksi
     live_factor=1.6, # -
     dead_factor=1.2, # -
-    beam_sizer=:continuous,
+    beam_sizer=:discrete,
     max_depth=25, # in
     beam_units=:in, # in, etc.
     serviceability_lim=360,
@@ -46,14 +43,15 @@ beam_sizing_params = SlabSizingParams(
     minimum_continuous=true
 );
 
-slab_params = analyze_slab(slab_params);  
+slab_params = analyze_slab(slab_params);
+slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
+slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
+print_forces(slab_results_discrete_noncollinear)
 
 slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear = iterate_discrete_continuous(slab_params, beam_sizing_params);
-save_results([slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear], subfolder = "SlabDesignFactors/results/test_results", filename = "test_unfactored_deflection")
+save_results([slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear], subfolder = "SlabDesignFactors/results/test_results", filename = "test_binary_search")
 
 #save("SlabDesignFactors/plot_figures/figures/tributary areas/orth_biaxial_1_1/r1c1.svg", slab_params.plot_context.fig)   
-
-slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
 
 for (i,minimizer) in enumerate(beam_sizing_params.minimizers)
     section = I_symm(minimizer...)
@@ -66,7 +64,6 @@ for (i,minimizer) in enumerate(beam_sizing_params.minimizers)
 end
 
 slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
-println("Noncollinear:\n")
 print_forces(slab_results_discrete_noncollinear)
 
 GC.gc()
