@@ -11,6 +11,10 @@
 .*tiff
 .*webp
 .*svg
+*.bak
+*.psd
+*.3dm
+*.hdr
 
 Paper/
 SlabDesignFactors/results/past_results
