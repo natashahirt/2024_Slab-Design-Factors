@@ -1,0 +1,5 @@
+/var/spool/slurmd/job60426648/slurm_script: line 15: module: command not found
+ERROR: UndefVarError: `analyze_slabs` not defined in `Main`
+Stacktrace:
+ [1] top-level scope
+   @ none:1

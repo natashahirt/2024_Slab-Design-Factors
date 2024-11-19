@@ -26,4 +26,4 @@ JSON_PATH=$(echo $PARAMS | cut -d ' ' -f 1)
 RESULTS_NAME=$(echo $PARAMS | cut -d ' ' -f 2)
 
 # Run the Julia script
-julia -e 'include(ENV["EXECUTABLE_PATH"]); analyze_slabs(ENV["JSON_PATH"], ENV["RESULTS_PATH"], ENV["RESULTS_NAME"])'
+julia -e 'include(ENV["EXECUTABLE_PATH"]); analyze_all_jsons(ENV["JSON_PATH"], ENV["RESULTS_PATH"], ENV["RESULTS_NAME"])'
