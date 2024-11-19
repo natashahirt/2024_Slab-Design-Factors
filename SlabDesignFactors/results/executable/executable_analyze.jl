@@ -1,29 +1,20 @@
 # analyze_single_slab.jl
 
-begin
+function analyze_slabs(json_path::String, results_path::String, results_name::String)
 
     # Include necessary modules
     include("../SlabDesignFactors.jl")
 
-    # Activate CairoMakie for plotting
-    CairoMakie.activate!()
-
     # Define slab parameters
-    slab_types = [:orth_biaxial] #, :orth_biaxial, :orth_biaxial, :uniaxial, :uniaxial, :uniaxial, :uniaxial]         # Slab types
-    vector_1ds = [[1.0, 0.0,]] #, [1.0, 0.0,], [1.0, 1.0,], [1.0, 0.0,], [0.0, 1.0,], [1.0, 1.0,], [1.0, -1.0,]]    # Vectors
-    max_depths = [25] #, 40]
-    slab_sizers = [:cellular] #, :uniform]
-    beam_sizers = [:discrete] #, :continuous]
+    slab_types = [:isotropic, :orth_biaxial, :orth_biaxial, :uniaxial, :uniaxial, :uniaxial, :uniaxial]         # Slab types
+    vector_1ds = [[0.0, 0.0,], [1.0, 0.0,], [1.0, 1.0,], [1.0, 0.0,], [0.0, 1.0,], [1.0, 1.0,], [1.0, -1.0,]]    # Vectors
+    max_depths = [25, 40]
+    slab_sizers = [:cellular, :uniform]
 
     # Define the path to the JSON file containing slab geometry
-    main_path = "SlabDesignFactors/jsons/topology/"  # Update this path as needed
-    sub_paths = filter(x -> endswith(x, ".json"), readdir(main_path))
-
-    results_path = "SlabDesignFactors/results/test_results/"
-    results_name = "test_multi_slab_orth_biaxial"
+    sub_paths = filter(x -> endswith(x, ".json"), readdir(json_path))
     
-    results = SlabOptimResults[]
-
+    # Evaluate slabs
     for max_depth in max_depths
 
         for slab_sizer in slab_sizers
@@ -69,7 +60,7 @@ begin
                         vector_1d=vector_1d, 
                         slab_sizer=slab_sizer,
                         spacing=.1, 
-                        plot_analysis=true,
+                        plot_analysis=false,
                         fix_param=true, 
                         slab_units=:m,
                     );
@@ -84,7 +75,6 @@ begin
                         max_depth=max_depth, # in
                         beam_units=:in, # in, etc.
                         serviceability_lim=360,
-                        collinear=false,
                         minimum_continuous=true
                     );
 
