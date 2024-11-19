@@ -1,9 +1,9 @@
 # analyze_single_slab.jl
 
-function analyze_slabs(json_path::String, results_path::String, results_name::String)
+function analyze_all_jsons(json_path::String, results_path::String, results_name::String)
 
     # Include necessary modules
-    include("../SlabDesignFactors.jl")
+    include("SlabDesignFactors/SlabDesignFactors.jl")
 
     # Define slab parameters
     slab_types = [:isotropic, :orth_biaxial, :orth_biaxial, :uniaxial, :uniaxial, :uniaxial, :uniaxial]         # Slab types
@@ -28,7 +28,7 @@ function analyze_slabs(json_path::String, results_path::String, results_name::St
 
                 for sub_path in sub_paths
 
-                    path = main_path * sub_path
+                    path = json_path * sub_path
                     name = replace(sub_path, ".json" => "")  
 
                     if isfile(results_file)

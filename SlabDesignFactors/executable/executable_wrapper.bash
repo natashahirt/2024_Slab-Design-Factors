@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the SLURM script and the maximum number of resubmissions
-SLURM_SCRIPT="SlabDesignFactors/results/executable/executable.slurm"
+SLURM_SCRIPT="SlabDesignFactors/executable/executable.slurm"
 MAX_RESUBMISSIONS=10
 COUNTER=0
 
