@@ -38,6 +38,9 @@ while [ $COUNTER -lt $MAX_RESUBMISSIONS ]; do
         echo "Job $JOB_ID failed. Exiting."
         echo -e "Job $JOB_ID failed. Please check the logs.\nDetails:\n$ERROR_LOG" | mail -s "SLURM Job Failure" $EMAIL
         exit 1
+    elif [ "$JOB_STATE" == "COMPLETED" ]; then
+        # Delete output and error files if the job completed successfully
+        rm -f output_${JOB_ID}.txt error_${JOB_ID}.txt
     fi
 
     # Increment the counter
