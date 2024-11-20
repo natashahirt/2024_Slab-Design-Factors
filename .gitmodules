@@ -1,12 +1,12 @@
 [submodule "AsapOptim"]
 	path = AsapOptim
-	url = ./AsapOptim
+	url = https://github.com/natashahirt/AsapOptim
 [submodule "AsapToolkit"]
 	path = AsapToolkit
-	url = ./AsapToolkit
+	url = https://github.com/natashahirt/AsapToolkit
 [submodule "TributaryAreas"]
 	path = TributaryAreas
-	url = ./TributaryAreas
+	url = https://github.com/natashahirt/TributaryAreas
 [submodule "VariableBeamOptimizer"]
 	path = VariableBeamOptimizer
-	url = ./VariableBeamOptimizer
+	url = https://github.com/natashahirt/VariableBeamOptimizer

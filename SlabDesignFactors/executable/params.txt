@@ -1,3 +1,3 @@
-SlabDesignFactors/jsons/topology/ topology
-SlabDesignFactors/jsons/star/ star
-SlabDesignFactors/jsons/grid/ grid
+../jsons/topology/ topology
+../jsons/star/ star
+../jsons/grid/ grid
