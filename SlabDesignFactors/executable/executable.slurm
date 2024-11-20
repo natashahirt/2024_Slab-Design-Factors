@@ -5,8 +5,8 @@
 #SBATCH -t 12:00:00
 #SBATCH -C centos7
 #SBATCH -p sched_any
-#SBATCH -o outputs/output_%j.txt
-#SBATCH -e outputs/output_%j.txt
+#SBATCH -o output_%j.txt
+#SBATCH -e output_%j.txt
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 #SBATCH --mail-user=nhirt@mit.edu
 
