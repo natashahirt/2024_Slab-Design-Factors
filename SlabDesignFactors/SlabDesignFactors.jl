@@ -1,3 +1,5 @@
+module SlabDesignFactors
+
 using Pkg
 Pkg.activate(".")
 
@@ -12,9 +14,11 @@ Nonconvex.@load MMA
 Nonconvex.@load NLopt
 
 # Include necessary modules for slab analysis and optimization
-include("../TributaryAreas/TributaryAreas.jl")  # Ensure this file is correctly formatted and exists
+include("../TributaryAreas/TributaryAreas.jl")
 include("../VariableBeamOptimizer/VariableBeamOptimizer.jl")
 
 Pkg.status()
 
 println("Initialization of Slab_Design_Factors complete")
+
+end # module SlabDesignFactors

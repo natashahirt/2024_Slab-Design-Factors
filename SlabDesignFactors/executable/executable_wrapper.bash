@@ -8,6 +8,10 @@ COUNTER=0
 # Email for notifications
 EMAIL="nhirt@mit.edu"
 
+# Path to the results directory and completion file
+RESULTS_PATH="SlabDesignFactors/results/remote_results/"
+COMPLETION_FILE="$RESULTS_PATH/analysis_complete.txt"
+
 # Function to submit the job and get the job ID
 submit_job() {
     JOB_ID=$(sbatch --parsable $SLURM_SCRIPT 2>&1)
@@ -24,7 +28,7 @@ submit_job() {
 submit_job
 
 # Loop to resubmit the job upon completion
-while [ $COUNTER -lt $MAX_RESUBMISSIONS ]; do
+while [ $COUNTER -lt $MAX_RESUBMISSIONS ] && [ ! -f "$COMPLETION_FILE" ]; do
     echo "Monitoring job $JOB_ID..."
 
     # Wait for the job to complete
@@ -61,11 +65,11 @@ while [ $COUNTER -lt $MAX_RESUBMISSIONS ]; do
     COUNTER=$((COUNTER + 1))
 
     # Resubmit the job if the maximum resubmissions hasn't been reached
-    if [ $COUNTER -lt $MAX_RESUBMISSIONS ]; then
+    if [ $COUNTER -lt $MAX_RESUBMISSIONS ] && [ ! -f "$COMPLETION_FILE" ]; then
         echo "Resubmitting job $COUNTER of $MAX_RESUBMISSIONS..."
         submit_job
     fi
 done
 
-echo "Reached maximum number of resubmissions: $MAX_RESUBMISSIONS"
-echo -e "Job resubmission limit reached ($MAX_RESUBMISSIONS).\nNo further submissions will be made." | mail -s "SLURM Resubmission Limit Reached" $EMAIL
+echo "Reached maximum number of resubmissions: $MAX_RESUBMISSIONS or completion file detected."
+echo -e "Job resubmission limit reached ($MAX_RESUBMISSIONS) or analysis completed.\nNo further submissions will be made." | mail -s "SLURM Resubmission Limit Reached or Analysis Completed" $EMAIL
