@@ -1,10 +1,14 @@
 # analyze_single_slab.jl
+include("../SlabDesignFactors.jl")
 
 using Base.Threads
+using JSON
+using CSV
+using DataFrames
+using .SlabDesignFactors
 
 function analyze_all_jsons(results_path::String)
 
-    include("../SlabDesignFactors.jl")
     println("Dependencies loaded successfully.")
 
     # Read parameters from file
@@ -25,7 +29,7 @@ function analyze_all_jsons(results_path::String)
 
         # Define slab parameters
         slab_types = [:isotropic, :orth_biaxial, :orth_biaxial, :uniaxial, :uniaxial, :uniaxial, :uniaxial]         # Slab types
-        vector_1ds = [[0.0, 0.0,], [1.0, 0.0,], [1.0, 1.0,], [1.0, 0.0,], [0.0, 1.0,], [1.0, 1.0,], [1.0, -1.0,]]    # Vectors
+        vector_1ds = [[0.0, 0.0], [1.0, 0.0,], [1.0, 1.0,], [1.0, 0.0,], [0.0, 1.0,], [1.0, 1.0,], [1.0, -1.0,]]    # Vectors
         max_depths = [25, 40]
         slab_sizers = [:cellular, :uniform]
 
@@ -68,11 +72,14 @@ function analyze_all_jsons(results_path::String)
                         println("================================================")
 
                         # Parse geometry from JSON
-                        geometry_dict = JSON.parse(JSON.parse(replace(read(path, String), "\\n" => ""), dicttype=Dict))
-                        geometry = generate_from_json(geometry_dict, plot=false, drawn=false);
+                        json_string = replace(read(path, String), "\\n" => "")
+                        geometry_dict = JSON.parse(JSON.parse(json_string, dicttype=Dict))
+
+                        # Use the function from the module
+                        geometry = SlabDesignFactors.generate_from_json(geometry_dict; plot=false, drawn=false)
 
                         # Create and analyze the slab
-                        slab_params = SlabAnalysisParams(
+                        slab_params = SlabDesignFactors.SlabAnalysisParams(
                             geometry, 
                             slab_name=name,
                             slab_type=slab_type,
@@ -85,9 +92,9 @@ function analyze_all_jsons(results_path::String)
                         );
 
                         # Sizing parameters
-                        beam_sizing_params = SlabSizingParams(
-                            live_load=psf_to_ksi(50), # ksi
-                            superimposed_dead_load=psf_to_ksi(15), # ksi
+                        beam_sizing_params = SlabDesignFactors.SlabSizingParams(
+                            live_load=SlabDesignFactors.psf_to_ksi(50), # ksi
+                            superimposed_dead_load=SlabDesignFactors.psf_to_ksi(15), # ksi
                             live_factor=1.6, # -
                             dead_factor=1.2, # -
                             beam_sizer=:discrete, # iteration runs through both discrete and continuous
@@ -97,9 +104,9 @@ function analyze_all_jsons(results_path::String)
                             minimum_continuous=true
                         );
 
-                        iteration_result = collect(iterate_discrete_continuous(slab_params, beam_sizing_params));
+                        iteration_result = collect(SlabDesignFactors.iterate_discrete_continuous(slab_params, beam_sizing_params));
                     
-                        append_results_to_csv(results_path, results_name, iteration_result)
+                        SlabDesignFactors.append_results_to_csv(results_path, String(results_name), iteration_result)
 
                         GC.gc() # garbage collect
 
@@ -113,8 +120,14 @@ function analyze_all_jsons(results_path::String)
 
     end
 
-    @threads for line in params_lines
-        process_params(line)
+    Threads.@threads for params in params_lines
+        process_params(params)
+    end
+
+    # Create a completion file to signal the end of processing
+    completion_file = joinpath(results_path, "analysis_complete.txt")
+    open(completion_file, "w") do f
+        write(f, "Analysis complete")
     end
 
 end
@@ -129,6 +142,7 @@ function main()
 
     results_path = args[1]
     analyze_all_jsons(results_path)
+
 end
 
 main()

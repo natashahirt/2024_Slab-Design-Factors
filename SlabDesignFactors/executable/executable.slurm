@@ -5,8 +5,8 @@
 #SBATCH -t 12:00:00
 #SBATCH -C centos7
 #SBATCH -p sched_any
-#SBATCH -o output_%j.txt
-#SBATCH -e output_%j.txt
+#SBATCH -o outputs/output_%j.txt
+#SBATCH -e outputs/output_%j.txt
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 #SBATCH --mail-user=nhirt@mit.edu
 
@@ -22,5 +22,21 @@ echo "Running Julia script..."
 
 # Run the Julia script
 julia -t 3 $EXECUTABLE_PATH $RESULTS_PATH
+
+# Check for completion file
+COMPLETION_FILE="$RESULTS_PATH/analysis_complete.txt"
+
+while [ ! -f "$COMPLETION_FILE" ]; do
+    sleep 60  # Check every 60 seconds
+done
+
+echo "Analysis complete. Terminating SLURM job."
+
+# Cancel the SLURM job
+scancel $SLURM_JOB_ID
+echo "SLURM job $SLURM_JOB_ID has been cancelled."
+
+# Optionally, you can add a command to clean up or notify
+# For example, send a notification email or clean up temporary files
 
 echo "Script completed."
