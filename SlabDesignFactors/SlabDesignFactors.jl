@@ -1,4 +1,3 @@
-# Ensure the environment is activated
 using Pkg
 Pkg.activate(".")
 

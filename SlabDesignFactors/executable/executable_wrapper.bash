@@ -17,6 +17,7 @@ submit_job() {
         exit 1
     fi
     echo "Submitted job $JOB_ID"
+    echo -e "Job $JOB_ID has been submitted successfully.\nSLURM Script: $SLURM_SCRIPT\n" | mail -s "SLURM Job Submitted" $EMAIL
 }
 
 # Initial job submission
@@ -24,30 +25,47 @@ submit_job
 
 # Loop to resubmit the job upon completion
 while [ $COUNTER -lt $MAX_RESUBMISSIONS ]; do
+    echo "Monitoring job $JOB_ID..."
+
     # Wait for the job to complete
-    squeue --job $JOB_ID > /dev/null 2>&1
-    while [ $? -eq 0 ]; do
+    while squeue --job $JOB_ID > /dev/null 2>&1; do
         sleep 60  # Check every minute
-        squeue --job $JOB_ID > /dev/null 2>&1
     done
 
     # Check the job's exit status
     JOB_STATE=$(sacct -j $JOB_ID --format=State --noheader | tr -d ' ')
+    ERROR_LOG=$(sacct -j $JOB_ID --format=JobID,JobName,State,ExitCode --noheader)
+
     if [ "$JOB_STATE" == "FAILED" ]; then
-        ERROR_LOG=$(sacct -j $JOB_ID --format=JobID,JobName,State,ExitCode --noheader)
         echo "Job $JOB_ID failed. Exiting."
-        echo -e "Job $JOB_ID failed. Please check the logs.\nDetails:\n$ERROR_LOG" | mail -s "SLURM Job Failure" $EMAIL
+        FULL_ERROR=$(sacct -j $JOB_ID --format=JobID,JobName,Partition,Account,State,ExitCode,MaxRSS,Elapsed,Timelimit --noheader)
+        echo -e "Job $JOB_ID failed. Full details:\n$FULL_ERROR\n" | mail -s "SLURM Job Failure" $EMAIL
         exit 1
     elif [ "$JOB_STATE" == "COMPLETED" ]; then
-        # Delete output and error files if the job completed successfully
-        rm -f output_${JOB_ID}.txt error_${JOB_ID}.txt
+        echo "Job $JOB_ID completed successfully."
+        OUTPUT_FILE="output_${JOB_ID}.txt"
+        ERROR_FILE="error_${JOB_ID}.txt"
+        
+        # Archive output and error files
+        if [ -f $OUTPUT_FILE ]; then
+            mv $OUTPUT_FILE outputs/
+        fi
+        if [ -f $ERROR_FILE ]; then
+            mv $ERROR_FILE errors/
+        fi
+        
+        echo -e "Job $JOB_ID completed successfully.\nArchived output to outputs/ and errors/." | mail -s "SLURM Job Completed" $EMAIL
     fi
 
     # Increment the counter
     COUNTER=$((COUNTER + 1))
 
-    # Resubmit the job
-    submit_job
+    # Resubmit the job if the maximum resubmissions hasn't been reached
+    if [ $COUNTER -lt $MAX_RESUBMISSIONS ]; then
+        echo "Resubmitting job $COUNTER of $MAX_RESUBMISSIONS..."
+        submit_job
+    fi
 done
 
 echo "Reached maximum number of resubmissions: $MAX_RESUBMISSIONS"
+echo -e "Job resubmission limit reached ($MAX_RESUBMISSIONS).\nNo further submissions will be made." | mail -s "SLURM Resubmission Limit Reached" $EMAIL

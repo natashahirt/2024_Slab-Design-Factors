@@ -1,6 +1,0 @@
-/var/spool/slurmd/job60426667/slurm_script: line 15: module: command not found
-sed: -e expression #1, char 2: invalid usage of line address 0
-ERROR: UndefVarError: `analyze_slabs` not defined in `Main`
-Stacktrace:
- [1] top-level scope
-   @ none:1
