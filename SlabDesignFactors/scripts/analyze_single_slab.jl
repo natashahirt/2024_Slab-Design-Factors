@@ -1,14 +1,12 @@
-# analyze_single_slab.jl
-
 # Include necessary modules
-include("../SlabDesignFactors.jl")
+include("_scripts.jl")
 
 # Activate CairoMakie for plotting
 CairoMakie.activate!()
 
 # Define the path to the JSON file containing slab geometry
 path = "SlabDesignFactors/jsons/special/rhombus_8x12.json"  # Update this path as needed
-path = "SlabDesignFactors/jsons/topology/r9c4.json"
+path = "SlabDesignFactors/jsons/topology/r1c2.json"
 
 name = basename(splitext(path)[1])    # Name for the plot
 
@@ -21,8 +19,8 @@ slab_params = SlabAnalysisParams(
     geometry, 
     slab_name=name,
     slab_type=:isotropic,
-    vector_1d=[0,1], 
-    slab_sizer=:cellular,
+    vector_1d=[1,0], 
+    slab_sizer=:uniform,
     spacing=.1, 
     plot_analysis=true,
     fix_param=true, 

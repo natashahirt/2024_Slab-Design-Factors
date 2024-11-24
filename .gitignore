@@ -14,6 +14,8 @@
 *.3dm
 *.hdr
 
-Paper/
 SlabDesignFactors/results/past_results
-SlabDesignFactors/plot_figures/figures
+SlabDesignFactors/results/test_results
+SlabDesignFactors/plot_figures/figures_raw*
+Manifest.toml
+Project.toml
