@@ -46,9 +46,8 @@ function plot_2_megaplot(df_all)
     max_slab = maximum(df_all.slab_ec) * 1.25
 
     # Pick out the individuals, novating with business as usual
-    #filter_function = row -> row.name == "r1c2" && row.slab_type == "uniaxial" && row.slab_sizer == "uniform" && row.beam_sizer == "discrete" && row.collinear == true && row.vector_1d_x == 1 && row.vector_1d_y == 0 && row.max_depth == 40
-    temp_bau_filter = row -> row.name == "r1c2" && row.slab_type == "isotropic" && row.beam_sizer == "discrete" && row.collinear
-    business_as_usual = filter(temp_bau_filter, df_all)
+    bau_filter = row -> row.name == "r1c2" && row.slab_type == "uniaxial" && row.slab_sizer == "uniform" && row.beam_sizer == "discrete" && row.collinear == true && row.vector_1d_x == 1 && row.vector_1d_y == 0 && row.max_depth == 40
+    business_as_usual = filter(bau_filter, df_all)
 
     bau_steel = business_as_usual.steel_ec[1]
     bau_slab = business_as_usual.slab_ec[1]
