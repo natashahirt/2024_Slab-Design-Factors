@@ -6,7 +6,7 @@ MAX_RESUBMISSIONS=10
 COUNTER=0
 EMAIL="nhirt@mit.edu"
 RESULTS_PATH="SlabDesignFactors/results/remote_results/"
-COMPLETION_FILE="$RESULTS_PATH/analysis_complete.txt"
+COMPLETION_FILE="$RESULTS_PATH/experiments_complete.txt"
 LOG_FILE="logs/slurm_monitor.log"
 
 # Log setup
