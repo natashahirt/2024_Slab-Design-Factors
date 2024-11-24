@@ -11,7 +11,7 @@
 #SBATCH --mail-user=nhirt@mit.edu
 
 # Set paths
-EXECUTABLE_PATH="SlabDesignFactors/executable/executable_analyze.jl"
+EXECUTABLE_PATH="SlabDesignFactors/executable/executable_experiments.jl"
 RESULTS_PATH="SlabDesignFactors/results/remote_results/"
 
 # Ensure output directories exist
@@ -24,13 +24,13 @@ echo "Running Julia script..."
 julia -t 3 $EXECUTABLE_PATH $RESULTS_PATH
 
 # Check for completion file
-COMPLETION_FILE="$RESULTS_PATH/analysis_complete.txt"
+COMPLETION_FILE="$RESULTS_PATH/experiments_complete.txt"
 
 while [ ! -f "$COMPLETION_FILE" ]; do
     sleep 60  # Check every 60 seconds
 done
 
-echo "Analysis complete. Terminating SLURM job."
+echo "Experiments complete. Terminating SLURM job."
 
 # Cancel the SLURM job
 scancel $SLURM_JOB_ID
