@@ -2,6 +2,15 @@
 cull(x) = (x isa Number && x == 0.) ? NaN : x
 
 # colours
+ibm_colors = Dict(
+    :ibm_cornflower => colorant"#648fff",
+    :ibm_slateblue => colorant"#785ef0",
+    :ibm_cerise => colorant"#dc267f",
+    :ibm_orange => colorant"#fe6100",
+    :ibm_gold => colorant"#ffb000",
+    :ibm_colormap => [:ibm_cornflower, :ibm_slateblue, :ibm_cerise, :ibm_orange, :ibm_gold]
+)
+
 色 = Dict(
     :powderblue => colorant"#aeddf5",
     :skyblue => colorant"#70cbfd",
