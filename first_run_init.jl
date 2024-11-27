@@ -12,6 +12,7 @@ Pkg.add("ChainRulesCore")
 Pkg.add("Colors")
 Pkg.add("CSV")
 Pkg.add("DataFrames")
+Pkg.add("GLMakie")
 Pkg.add("Interpolations")
 Pkg.add("JSON")
 Pkg.add("LinearSolve");

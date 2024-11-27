@@ -36,19 +36,19 @@ function csv_2_df(folders::Vector{String}; categories::Vector{String}=[])
 
         row = df[i,:]
 
-        if row.slab_type == "isotropic"
+        if row.slab_type == "bidirectional"
 
             row.symbol = :star8
             row.rotation = 0.
             row.vector_1d_x = 0.
             row.vector_1d_y = 0.
 
-        elseif row.slab_type == "orth_biaxial"
+        elseif row.slab_type == "orth_overlaid"
 
             row.symbol = :cross
             row.rotation = get_vector_1d_angle([row.vector_1d_x,row.vector_1d_y])
 
-        elseif row.slab_type == "uniaxial"
+        elseif row.slab_type == "unidirectional"
 
             row.symbol = :hline
             row.rotation = get_vector_1d_angle([row.vector_1d_x,row.vector_1d_y])

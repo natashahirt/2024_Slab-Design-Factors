@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.7.10)  18 NOV 2024 08:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.7.10)  26 NOV 2024 14:03
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -751,15 +751,15 @@ File: assets/1_block_slab.jpg Graphic file (type jpg)
 <use assets/1_block_slab.jpg>
 Package pdftex.def Info: assets/1_block_slab.jpg  used on input line 77.
 (pdftex.def)             Requested size: 248.96957pt x 138.08414pt.
- [2 <./assets/1_nervi_gatti.jpg> <./assets/1_block_slab.jpg>] [3{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-Overfull \vbox (88.6588pt too high) has occurred while \output is active []
+ [2 <./assets/1_nervi_gatti.jpg> <./assets/1_block_slab.jpg>] [3{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}] [4]
+Overfull \vbox (60.20047pt too high) has occurred while \output is active []
 
- [4]
-Overfull \hbox (25.07956pt too wide) in paragraph at lines 180--180
+ [5]
+Overfull \hbox (25.07956pt too wide) in paragraph at lines 190--190
 []\OT1/cmr/m/n/10 Architecture 2030. \OT1/cmr/m/it/10 Why The Built En-vi-ron-ment -- Ar-chi-tec-ture 2030\OT1/cmr/m/n/10 . https://www.architecture2030.org/why-
  []
 
-[5] [6] (./SlabDesignFactors.aux)
+[6] [7] (./SlabDesignFactors.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
@@ -771,18 +771,18 @@ Package logreq Info: Writing requests to 'SlabDesignFactors.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 21923 strings out of 474116
- 383354 string characters out of 5743682
+ 21924 strings out of 474116
+ 383360 string characters out of 5743682
  1941187 words of memory out of 5000000
  43981 multiletter control sequences out of 15000+600000
  567381 words of font info for 72 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 79i,11n,93p,2469b,1688s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 79i,12n,93p,2469b,1688s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on SlabDesignFactors.pdf (6 pages, 1623640 bytes).
+Output written on SlabDesignFactors.pdf (7 pages, 1624519 bytes).
 PDF statistics:
- 320 PDF objects out of 1000 (max. 8388607)
- 281 compressed objects within 3 object streams
- 65 named destinations out of 1000 (max. 500000)
+ 326 PDF objects out of 1000 (max. 8388607)
+ 286 compressed objects within 3 object streams
+ 66 named destinations out of 1000 (max. 500000)
  291 words of extra memory for PDF output out of 10000 (max. 10000000)
 
