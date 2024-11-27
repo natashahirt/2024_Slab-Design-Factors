@@ -34,14 +34,17 @@ begin
     gradient_grid = grid[2,1] = GridLayout()
 
     # import CSVs
-    df_all = csv_2_df(["3_grasshopper_slabs_topology/", "3_grasshopper_slabs_grid/", "3_grasshopper_slabs_nova_start/", "3_grasshopper_slabs_nova_end/"], categories=["t","g","s","s"])
+    df_all = csv_2_df(["SlabDesignFactors/results/past_results/3_grasshopper_slabs_topology/", "SlabDesignFactors/results/past_results/3_grasshopper_slabs_grid/", "SlabDesignFactors/results/past_results/3_grasshopper_slabs_nova_start/", "SlabDesignFactors/results/past_results/3_grasshopper_slabs_nova_end/"], categories=["t","g","s","s"])
     df_all = filter(row -> !isnan(row.total_ec), df_all)
+
+    # Print unique slab types
+    unique_slab_types = unique(df_all.slab_type)
 
     max_steel = maximum(df_all.steel_ec) * 1.25
     max_slab = maximum(df_all.slab_ec) * 1.25
     
     # pick out the individuals, starting with business as usual
-    filter_function = row -> row.name == "r1c2" && row.slab_type == "uniaxial" && row.slab_sizer == "uniform" && row.beam_sizer == "discrete" && row.collinear == true && row.vector_1d_x == 1 && row.vector_1d_y == 0 && row.max_depth == 40
+    filter_function = row -> row.name == "r1c2" && row.slab_type == "unidirectional" && row.slab_sizer == "uniform" && row.beam_sizer == "discrete" && row.collinear == true && row.vector_1d_x == 1 && row.vector_1d_y == 0 && row.max_depth == 40
     business_as_usual = filter(filter_function, df_all)
 
     bau_steel = business_as_usual.steel_ec[1]
@@ -206,10 +209,10 @@ begin
 
     axislegend(ax3, [elem_rebar, elem_steel, elem_concrete], ["Rebar", "Steel", "Concrete"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor = :white, labelsize=smallfontsize, patchsize = (2,10), padding=(0,0,0,0))
 
-    di = DataInspector(fig)
+    #di = DataInspector(fig)
 
     # display
     display(fig)
-    save("figures/megaplot.pdf", fig)
+    #save("figures/megaplot.pdf", fig)
 
 end

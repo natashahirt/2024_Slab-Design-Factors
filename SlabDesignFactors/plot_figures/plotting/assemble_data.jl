@@ -40,7 +40,11 @@ function assemble_data(files::Vector{String}; category_names::Vector{String}=Str
     end
 
     df.steel_ec = df.steel_norm .* ECC_STEEL
-    df.concrete_ec = df.concrete_norm .* ECC_CONCRETE
+    df.concrete_ec = df.concrete_norm ./ ρ_CONCRETE .* ECC_CONCRETE_M3
+    #df.concrete_ec = df.concrete_norm .* ECC_CONCRETE
+    println("Concrete norm: ", mean(df.concrete_norm))
+    println("Concrete coefficient: ", 1/ρ_CONCRETE * ECC_CONCRETE_M3)
+    println("Mean concrete embodied carbon kg: ", mean(df.concrete_ec))
     df.rebar_ec = df.rebar_norm .* ECC_REBAR
     df.slab_ec = df.concrete_ec + df.rebar_ec
     df.total_ec = df.steel_ec + df.concrete_ec + df.rebar_ec

@@ -4,13 +4,13 @@
 Creates a multi-plot figure to visualize various slab design factors.
 """
 function plot_1_multiplot(df_all)
-    CairoMakie.activate!()
-    fig = Figure(size=(190*4, 190*4.6))
+    GLMakie.activate!()
+    fig = Figure(size=(190*4, 190*2.125))
 
     # Common axis settings
     axis_kwargs = Dict(
         :aspect => DataAspect(),
-        :limits => (0, maximum(df_all.steel_ec) * 1.25, 0, maximum(df_all.slab_ec) * 1.25),
+        :limits => (0,150,0,150), #(0, maximum(df_all.steel_ec) * 1.25, 0, maximum(df_all.slab_ec) * 1.25),
         :yticklabelsize => 11,
         :xticklabelsize => 11,
         :xlabelsize => 11,
@@ -20,11 +20,11 @@ function plot_1_multiplot(df_all)
 
     sk = Dict(
         :transparency => true,
-        :markersize => 3.5,
-        :markersize_large => 5,
+        :markersize => 1.5,
+        :markersize_large => 4,
         :fontsize => 11,
         :fontsize_small => 8,
-        :alpha => 0.2,
+        :alpha => 0.4,
         :elem_usual => MarkerElement(color = 色[:skyblue], marker = :circle),
         :elem_optimal => MarkerElement(color = 色[:irispurple], marker = :circle),
         :elem_isotropic => MarkerElement(color = 色[:skyblue], marker = :star8),
@@ -39,7 +39,7 @@ function plot_1_multiplot(df_all)
     grid_main = fig[1,1] = GridLayout()
 
     grid_subplots = grid_main[1, 1] = GridLayout()
-    grid_slabtype = grid_main[2, 1] = GridLayout()
+    grid_slabtype = grid_main[1, 2] = GridLayout()
 
     colgap!(grid_subplots, 2)
     rowgap!(grid_subplots, 2)
@@ -48,18 +48,19 @@ function plot_1_multiplot(df_all)
 
     function create_scatter(ax, df_usual, df_optimal; title, ylabel=nothing, xlabel=nothing)
         # Plot scatter for usual and optimal data
-        scatter!(ax, df_usual.steel_ec, df_usual.slab_ec, 
-                 marker=df_usual.symbol, rotation=df_usual.rotation, 
-                 color=(色[:skyblue], sk[:alpha]), transparency=sk[:transparency], 
-                 markersize=sk[:markersize], 
-                 inspector_label=(self, i, p) -> df_usual.category[i] * ": " * df_usual.name[i])
-    
         scatter!(ax, df_optimal.steel_ec, df_optimal.slab_ec, 
                  marker=df_optimal.symbol, rotation=df_optimal.rotation, 
-                 color=(色[:irispurple], sk[:alpha]), transparency=sk[:transparency], 
-                 markersize=sk[:markersize], 
+                 color=(色[:irispurple]), transparency=sk[:transparency], 
+                 markersize=sk[:markersize], alpha=sk[:alpha],
                  inspector_label=(self, i, p) -> df_optimal.category[i] * ": " * df_optimal.name[i])
     
+        scatter!(ax, df_usual.steel_ec, df_usual.slab_ec, 
+                 marker=df_usual.symbol, rotation=df_usual.rotation, 
+                 color=(色[:skyblue]), transparency=sk[:transparency], 
+                 markersize=sk[:markersize], alpha=sk[:alpha],
+                 inspector_label=(self, i, p) -> df_usual.category[i] * ": " * df_usual.name[i])
+    
+
         # Set axis properties
         ax.title = title
         if ylabel !== nothing
@@ -84,9 +85,12 @@ function plot_1_multiplot(df_all)
     create_scatter(ax4, filter(row -> row.max_depth == 25, df_all), filter(row -> row.max_depth == 40, df_all), title="d) Assembly depth", xlabel="EC steel kgCO2e/m²")
 
     ax5 = Axis(grid_slabtype[1, 1]; axis_kwargs...)
-    scatter!(ax5, filter(row -> row.slab_type == "isotropic", df_all).steel_ec, filter(row -> row.slab_type == "isotropic", df_all).slab_ec, marker=:star8, color=(色[:skyblue], 0.2), transparency=true, markersize=5)
-    scatter!(ax5, filter(row -> row.slab_type == "orth_biaxial", df_all).steel_ec, filter(row -> row.slab_type == "orth_biaxial", df_all).slab_ec, marker=:cross, color=(色[:irispurple], 0.2), transparency=true, markersize=5)
-    scatter!(ax5, filter(row -> row.slab_type == "uniaxial", df_all).steel_ec, filter(row -> row.slab_type == "uniaxial", df_all).slab_ec, marker=:hline, color=(色[:magenta], 0.2), transparency=true, markersize=5)
+    isotropic_data = filter(row -> row.slab_type == "isotropic", df_all)
+    scatter!(ax5, isotropic_data.steel_ec, isotropic_data.slab_ec, marker=:star8, color=(色[:skyblue], 0.2), transparency=true, markersize=sk[:markersize_large])
+    orth_biaxial_data = filter(row -> row.slab_type == "orth_biaxial", df_all)
+    scatter!(ax5, orth_biaxial_data.steel_ec, orth_biaxial_data.slab_ec, marker=:cross, color=(色[:irispurple], 0.2), transparency=true, markersize=sk[:markersize_large])
+    uniaxial_data = filter(row -> row.slab_type == "uniaxial", df_all)
+    scatter!(ax5, uniaxial_data.steel_ec, uniaxial_data.slab_ec, marker=:hline, color=(色[:magenta], 0.2), transparency=true, markersize=sk[:markersize_large], rotation=uniaxial_data.rotation)
     ax5.title = "e) Slab Types"
     ax5.xlabel = "EC steel kgCO2e/m²"
     ax5.ylabel = "EC RC-slab kgCO2e/m²"

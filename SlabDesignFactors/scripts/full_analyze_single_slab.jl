@@ -10,7 +10,7 @@ begin
     # Define the path to the JSON file containing slab geometry
     main_path = "SlabDesignFactors/jsons/topology/"  # Update this path as needed
     sub_paths = filter(x -> endswith(x, ".json"), readdir(main_path))
-    sub_path = "r9c4.json"
+    sub_path = "r1c2.json"
     path = main_path * sub_path
     name = replace(sub_path, ".json" => "")
 
