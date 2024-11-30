@@ -131,7 +131,7 @@ function analyze_all_jsons(results_path::String)
     end
 
     # Create a completion file to signal the end of processing
-    completion_file = joinpath(results_path, "analysis_rerun_complete.txt")
+    completion_file = joinpath(results_path, "analysis_complete.txt")
     open(completion_file, "w") do f
         write(f, "Analysis complete")
     end
