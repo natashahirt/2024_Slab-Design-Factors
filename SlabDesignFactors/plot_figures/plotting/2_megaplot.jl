@@ -31,11 +31,11 @@ function plot_2_megaplot(df_all)
 
     # Grid
     grid = fig[1, 1] = GridLayout()
-    scattergrid = grid[1,1] = GridLayout(tellwidth=true)
+    scattergrid = grid[1,1] = GridLayout()
     gradient_grid = scattergrid[2,1] = GridLayout()
     bargrid = grid[1,2] = GridLayout()
 
-    rowsize!(scattergrid, 2, Fixed(190*1.95))
+    rowsize!(scattergrid, 2, Fixed(203))
     rowgap!(scattergrid, 1, Fixed(20))
     colsize!(grid, 1, Relative(5/6))
 
@@ -52,7 +52,7 @@ function plot_2_megaplot(df_all)
     bau_steel = business_as_usual.steel_ec[1]
     bau_slab = business_as_usual.slab_ec[1]
 
-    color_filter = row -> row.beam_sizer == "discrete" && row.collinear == true && row.max_depth == 25 && row.slab_sizer == "uniform"
+    color_filter = row -> row.beam_sizer == "discrete" && row.collinear == true && row.slab_sizer == "uniform"
     df_grey = filter(!color_filter, df_all)
     df_color = filter(color_filter, df_all)
 
@@ -73,11 +73,30 @@ function plot_2_megaplot(df_all)
     x_lim_min = minimum(less_than_bau.steel_ec) * .9
     y_lim_min = minimum(less_than_bau.slab_ec) * .9
 
-    ax2 = Axis(gradient_grid[1,1], yticks = collect(0:10:bau_slab), aspect=DataAspect(), title = "b) Element density (inset)", xlabel = "EC steel kgCO2e/m²", ylabel = "EC RC-slab kgCO2e/m²", yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize=fontsize, limits=(x_lim_min,bau_steel * 1.1,y_lim_min,bau_slab*1.1))
+    ax2_limits = (x_lim_min,bau_steel * 1.1,y_lim_min,bau_slab*1.1)
+    ax2 = Axis(gradient_grid[1,1], yticks = collect(0:10:bau_slab), aspect=DataAspect(), title = "b) Element density (inset)", xlabel = "EC steel kgCO2e/m²", ylabel = "EC RC-slab kgCO2e/m²", yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize=fontsize, limits=ax2_limits)
     axislegend(ax1, [elem_t, elem_g, elem_s, elem_grey], ["Topology", "Grid", "Nova", "Non-standard"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor = :white, labelsize=9, patchsize = (2,10), padding=(0,0,0,0))
     axislegend(ax2, [elem_g, elem_s], ["Grid", "Nova"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor = :white, labelsize=9, patchsize = (2,10), padding=(2,2,2,2))
 
-    ax3 = Axis(bargrid[1,1], title = "c) Ranked EC", xlabel = "EC kgCO2e/m²", limits=(0,nothing,0,length(df_all.name)), yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize= fontsize)
+    ax3 = Axis(bargrid[1,1], title = "c) Ranked EC", xlabel = "EC kgCO2e/m²", limits=(0,maximum(df_all.total_ec),0,length(df_all.name)), yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize= fontsize)
+
+    # Iso-EC lines
+    ec_lines = collect(range(1, maximum(df_all.total_ec) / 10)) .* 10
+
+    for i in 1:lastindex(ec_lines)
+        if ec_lines[i] <= bau_steel + bau_slab
+            lines!(ax1, [0, ec_lines[i]], [ec_lines[i], 0], color = ec_lines[i], colormap = (Reverse(:grays), 0.25), colorrange = (0, bau_steel + bau_slab), linestyle = :dash, linewidth = 1, inspectable = false)
+            lines!(ax2, [0, ec_lines[i]], [ec_lines[i], 0], color = ec_lines[i], colormap = (Reverse(:grays), 0.25), colorrange = (0, bau_steel + bau_slab), linestyle = :dash, linewidth = 1, inspectable = false)
+        else
+            lines!(ax1, [0, ec_lines[i]], [ec_lines[i], 0], color = ec_lines[i], colormap = (:grays, 0.25), colorrange = (bau_steel + bau_slab, maximum(ec_lines)), linestyle = :dash, linewidth = 1, inspectable = false)
+            lines!(ax2, [0, ec_lines[i]], [ec_lines[i], 0], color = ec_lines[i], colormap = (:grays, 0.25), colorrange = (bau_steel + bau_slab, maximum(ec_lines)), linestyle = :dash, linewidth = 1, inspectable = false)
+        end
+    end
+    
+    # Plot inset
+    limit_points = [Point2f(ax2_limits[1], ax2_limits[3]), Point2f(ax2_limits[2], ax2_limits[3]), Point2f(ax2_limits[2], ax2_limits[4]), Point2f(ax2_limits[1], ax2_limits[4])]
+    poly!(ax1, limit_points, color = :white, inspectable = false, strokewidth = 1, strokecolor = :lightgrey, transparency = false)
+    text!(ax1, ax2_limits[1]+1, ax2_limits[3]+1, text="inset", color = :lightgrey, align = (:left, :bottom), fontsize = smallfontsize)
 
     # Plot greater than
     filter_function = row -> row.category == "topology"
@@ -114,11 +133,11 @@ function plot_2_megaplot(df_all)
     n_elements_grid = [length(df_grid[i,:].ids) for i in 1:lastindex(df_grid.name)]
     n_elements_nova = [length(df_nova[i,:].ids) for i in 1:lastindex(df_nova.name)]
 
-    scatter!(ax2, df_grid.steel_ec, df_grid.slab_ec, marker=df_grid.symbol, rotation=df_grid.rotation, color = n_elements_grid, colormap = Reverse(:acton), colorrange = (0,maximum(n_elements_grid)), transparency = false, markersize=markersize_zoom, inspector_label = (self, i, p) -> df_grid.rowcol[i])
+    scatter!(ax2, df_grid.steel_ec, df_grid.slab_ec, marker=df_grid.symbol, rotation=df_grid.rotation, color = n_elements_grid, colormap = Reverse(:acton), colorrange = (0,maximum(n_elements_nova)), transparency = false, markersize=markersize_zoom, inspector_label = (self, i, p) -> df_grid.rowcol[i])
     scatter!(ax2, df_nova.steel_ec, df_nova.slab_ec, marker=df_nova.symbol, rotation=df_nova.rotation, color = n_elements_nova, colormap = Reverse(:devon), colorrange = (0,maximum(n_elements_nova)), transparency = false, markersize=markersize_zoom, inspector_label = (self, i, p) -> df_nova.rowcol[i])
 
-    Colorbar(gradient_grid[1,2], limits = (0, maximum(n_elements_grid)), colormap = Reverse(:acton), ticklabelsize=smallfontsize, labelsize=smallfontsize, label="# grid elements", ticklabelrotation=pi/2, tellheight=false)
-    Colorbar(gradient_grid[1,3], limits = (0, maximum(n_elements_nova)), colormap = Reverse(:devon), ticklabelsize=smallfontsize, labelsize=smallfontsize, label="# nova elements", ticklabelrotation=pi/2, tellheight=false)
+    Colorbar(gradient_grid[1,2], limits = (0, maximum(n_elements_nova)), colormap = Reverse(:acton), ticklabelsize=smallfontsize, labelsize=smallfontsize, label="# grid elements", ticklabelrotation=pi/2)
+    Colorbar(gradient_grid[1,3], limits = (0, maximum(n_elements_nova)), colormap = Reverse(:devon), ticklabelsize=smallfontsize, labelsize=smallfontsize, label="# nova elements", ticklabelrotation=pi/2)
 
     # Plot business as usual
     scatter!(ax1, bau_steel, bau_slab, marker=business_as_usual.symbol, transparency = transparency, markersize=markersize, rotation=business_as_usual.rotation, color=:black, inspector_label = (self, i, p) -> business_as_usual.rowcol[i])
@@ -126,23 +145,13 @@ function plot_2_megaplot(df_all)
     vlines!(ax1, bau_steel, color = :black, linestyle = :dash, linewidth = 1, inspectable = false)
     hlines!(ax1, bau_slab, color = :black, linestyle = :dash, linewidth = 1, inspectable = false)
     lines!(ax1, [bau_slab + bau_steel, 0], [0, bau_slab + bau_steel], color = :black, linestyle = :dash, linewidth = 1, inspectable = false)
+    text!(ax1, 149, bau_slab + 1, text="BAU slab", color = :black, align = (:right, :bottom), fontsize = smallfontsize)
+    text!(ax1, bau_steel + 2, 1, text="BAU steel", color = :black, rotation = pi/2, align = (:left, :center), fontsize = smallfontsize)
+    text!(ax1, bau_slab+bau_steel, 3, text="BAU total", color = :black, rotation=-pi/4, align = (:right, :center), fontsize = smallfontsize)
 
     vlines!(ax2, bau_steel, color = :black, linestyle = :dash, linewidth = 1, inspectable = false)
     hlines!(ax2, bau_slab, color = :black, linestyle = :dash, linewidth = 1, inspectable = false)
     lines!(ax2, [bau_slab + bau_steel, 0], [0, bau_slab + bau_steel], color  = :black, linestyle = :dash, linewidth = 1, inspectable = false)
-
-    # Iso-EC lines
-    ec_lines = collect(range(1, maximum(df_all.total_ec) / 10)) .* 10
-
-    for i in 1:lastindex(ec_lines)
-        if ec_lines[i] <= bau_steel + bau_slab
-            lines!(ax1, [0, ec_lines[i]], [ec_lines[i], 0], color = ec_lines[i], colormap = (Reverse(:grays), 0.25), colorrange = (0, bau_steel + bau_slab), linestyle = :dash, linewidth = 1, inspectable = false)
-            lines!(ax2, [0, ec_lines[i]], [ec_lines[i], 0], color = ec_lines[i], colormap = (Reverse(:grays), 0.25), colorrange = (0, bau_steel + bau_slab), linestyle = :dash, linewidth = 1, inspectable = false)
-        else
-            lines!(ax1, [0, ec_lines[i]], [ec_lines[i], 0], color = ec_lines[i], colormap = (:grays, 0.25), colorrange = (bau_steel + bau_slab, maximum(ec_lines)), linestyle = :dash, linewidth = 1, inspectable = false)
-            lines!(ax2, [0, ec_lines[i]], [ec_lines[i], 0], color = ec_lines[i], colormap = (:grays, 0.25), colorrange = (bau_steel + bau_slab, maximum(ec_lines)), linestyle = :dash, linewidth = 1, inspectable = false)
-        end
-    end
 
     # Barplot
     sort!(df_all, order(:total_ec))
@@ -181,6 +190,13 @@ function plot_2_megaplot(df_all)
         barplot!(ax3, categories, data_barplot, stack=stack, gap=0, color=colours, direction=:x, colormap = [(色[:charcoalgrey], a), (色[:skyblue], a), (色[:magenta], a)])
     end
 
+    less_than_bau_elements = length(filter(row -> row.total_ec < bau_steel + bau_slab, df_all).name)
+    hlines!(ax3, [less_than_bau_elements], color = :black, linestyle = :dash, linewidth = 1, inspectable = false)
+    text!(ax3, maximum(df_all.total_ec)-15, less_than_bau_elements-30, text="< BAU", color = :black, align = (:right, :top), fontsize = smallfontsize)
+    less_than_axis_limits = length(filter(row -> row.total_ec < 150 + 150, df_all).name)
+    hlines!(ax3, [less_than_axis_limits], color = :black, linestyle = :dash, linewidth = 1, inspectable = false)
+    text!(ax3, maximum(df_all.total_ec)-15, less_than_axis_limits-30, text="< axis limits", color = :black, align = (:right, :top), fontsize = smallfontsize)
+    
     axislegend(ax3, [elem_rebar, elem_steel, elem_concrete], ["Rebar", "Steel", "Concrete"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor= :white, labelsize=smallfontsize, patchsize = (2,10), padding=(0,0,0,0))
 
     di = DataInspector(fig)

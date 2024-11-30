@@ -1,13 +1,13 @@
 # Fdb version 4
-["biber SlabDesignFactors"] 0 "SlabDesignFactors.bcf" "SlabDesignFactors.bbl" "SlabDesignFactors" 1732647836.54515 -1
-  "SlabDesignFactors.bcf" 1732647836.37028 109420 577149acbb8ba6659b040de32c3c52e6 "pdflatex"
+["biber SlabDesignFactors"] 0 "SlabDesignFactors.bcf" "SlabDesignFactors.bbl" "SlabDesignFactors" 1732997457.79924 -1
+  "SlabDesignFactors.bcf" 1732997457.61004 109420 577149acbb8ba6659b040de32c3c52e6 "pdflatex"
   "bibliography/SlabDesignFactors-reference.bib" 1732471847.09264 41103 2216062ba1fb9c165dc4b1e2229d92ad ""
   (generated)
   "SlabDesignFactors.bbl"
   "SlabDesignFactors.blg"
   (rewritten before read)
-["pdflatex"] 1732647834.26199 "/Users/tashahirt/Dropbox (MIT)/_MIT/DS Research/2024_Slab Design Factors/SlabDesignFactors/paper/SlabDesignFactors.tex" "SlabDesignFactors.pdf" "SlabDesignFactors" 1732647836.54576 0
-  "/Users/tashahirt/Dropbox (MIT)/_MIT/DS Research/2024_Slab Design Factors/SlabDesignFactors/paper/SlabDesignFactors.tex" 1732647833.62564 15104 652a87c2c8e2e3ea53661689f32ac580 ""
+["pdflatex"] 1732997455.57655 "/Users/tashahirt/Dropbox (MIT)/_MIT/DS Research/2024_Slab Design Factors/SlabDesignFactors/paper/SlabDesignFactors.tex" "SlabDesignFactors.pdf" "SlabDesignFactors" 1732997457.79978 0
+  "/Users/tashahirt/Dropbox (MIT)/_MIT/DS Research/2024_Slab Design Factors/SlabDesignFactors/paper/SlabDesignFactors.tex" 1732997453.72892 15139 860ef5dd0f6653057703b9cb1135ba3f ""
   "/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2024/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1136768653 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
@@ -137,11 +137,11 @@
   "/usr/local/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1720626937.53926 5467645 128b85b7cde5f5edc5cb7f1dd7ff8736 ""
   "/usr/local/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt" 1720626543 8221421 a03cf37bec7c827b4c6728b8a9bf7389 ""
   "/usr/local/texlive/2024/texmf.cnf" 1710266656 577 e590dabc9e28c5b61546e15f63eebcdf ""
-  "SlabDesignFactors.aux" 1732647836.36443 11822 30ed0d770a1adea624cfb4f328735183 "pdflatex"
+  "SlabDesignFactors.aux" 1732997457.60449 11822 30ed0d770a1adea624cfb4f328735183 "pdflatex"
   "SlabDesignFactors.bbl" 1732471847.08321 61805 f45de75100adef15f01574e522950fab "biber SlabDesignFactors"
-  "SlabDesignFactors.out" 1732647836.36786 6914 49d0da060104bb38e2023877925be794 "pdflatex"
-  "SlabDesignFactors.run.xml" 1732647836.37226 2426 f227b5277578da22bdd37a0cae21b3af "pdflatex"
-  "SlabDesignFactors.tex" 1732647833.62564 15104 652a87c2c8e2e3ea53661689f32ac580 ""
+  "SlabDesignFactors.out" 1732997457.6084 6914 49d0da060104bb38e2023877925be794 "pdflatex"
+  "SlabDesignFactors.run.xml" 1732997457.61114 2426 f227b5277578da22bdd37a0cae21b3af "pdflatex"
+  "SlabDesignFactors.tex" 1732997453.72892 15139 860ef5dd0f6653057703b9cb1135ba3f ""
   "assets/1_block_slab.jpg" 1731937713.41724 1094550 8816020359b42c571cb6f401c2cf81a4 ""
   "assets/1_nervi_gatti.jpg" 1731937399.66286 338246 6425745da06a8f51ecb2b35bb2755810 ""
   (generated)

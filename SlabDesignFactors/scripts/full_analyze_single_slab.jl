@@ -2,7 +2,7 @@
 
 begin    
     # Include necessary modules
-    include("../SlabDesignFactors.jl")
+    include("_scripts.jl")
 
     # Activate CairoMakie for plotting
     CairoMakie.activate!()

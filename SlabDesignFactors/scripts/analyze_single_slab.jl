@@ -6,13 +6,13 @@ CairoMakie.activate!()
 
 # Define the path to the JSON file containing slab geometry
 path = "SlabDesignFactors/jsons/special/rhombus_8x12.json"  # Update this path as needed
-path = "SlabDesignFactors/jsons/topology/r1c2.json"
+path = "SlabDesignFactors/jsons/special/test_drawn.json"
 
 name = basename(splitext(path)[1])    # Name for the plot
 
 # Parse geometry from JSON
 geometry_dict = JSON.parse(JSON.parse(replace(read(path, String), "\\n" => ""), dicttype=Dict))
-geometry = generate_from_json(geometry_dict, plot=false, drawn=false);
+geometry = generate_from_json(geometry_dict, plot=false, drawn=true);
 
 # Analyze the slab to get dimensions
 slab_params = SlabAnalysisParams(

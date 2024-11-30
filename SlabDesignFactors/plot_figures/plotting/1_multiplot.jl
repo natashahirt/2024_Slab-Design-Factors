@@ -5,7 +5,7 @@ Creates a multi-plot figure to visualize various slab design factors.
 """
 function plot_1_multiplot(df_all)
     GLMakie.activate!()
-    fig = Figure(size=(190*4, 190*2.125))
+    fig = Figure(size=(190*4, 190*2))
 
     # Common axis settings
     axis_kwargs = Dict(
@@ -53,13 +53,20 @@ function plot_1_multiplot(df_all)
                  color=(色[:irispurple]), transparency=sk[:transparency], 
                  markersize=sk[:markersize], alpha=sk[:alpha],
                  inspector_label=(self, i, p) -> df_optimal.category[i] * ": " * df_optimal.name[i])
+
+        hull = andrew_hull(df_optimal.steel_ec, df_optimal.slab_ec)[1]
+        points = [Point2f(df_optimal.steel_ec[i], df_optimal.slab_ec[i]) for i in hull]
+        poly!(ax, points, color=(色[:irispurple], 0.05), transparency=true, strokewidth=0.5, strokecolor=色[:irispurple], linestyle=:dash)
     
         scatter!(ax, df_usual.steel_ec, df_usual.slab_ec, 
                  marker=df_usual.symbol, rotation=df_usual.rotation, 
                  color=(色[:skyblue]), transparency=sk[:transparency], 
                  markersize=sk[:markersize], alpha=sk[:alpha],
                  inspector_label=(self, i, p) -> df_usual.category[i] * ": " * df_usual.name[i])
-    
+
+        hull = andrew_hull(df_usual.steel_ec, df_usual.slab_ec)[1]
+        points = [Point2f(df_usual.steel_ec[i], df_usual.slab_ec[i]) for i in hull]
+        poly!(ax, points, color=(色[:skyblue], 0.05), transparency=true, strokewidth=0.5, strokecolor=色[:skyblue], linestyle=:dash)
 
         # Set axis properties
         ax.title = title
@@ -95,6 +102,19 @@ function plot_1_multiplot(df_all)
     ax5.xlabel = "EC steel kgCO2e/m²"
     ax5.ylabel = "EC RC-slab kgCO2e/m²"
 
+    hull = andrew_hull(orth_biaxial_data.steel_ec, orth_biaxial_data.slab_ec)[1]
+    points = [Point2f(orth_biaxial_data.steel_ec[i], orth_biaxial_data.slab_ec[i]) for i in hull]
+    poly!(ax5, points, color=(色[:irispurple], 0.05), transparency=true, strokewidth=0.5, strokecolor=色[:irispurple], linestyle=:dash)
+
+    hull = andrew_hull(uniaxial_data.steel_ec, uniaxial_data.slab_ec)[1]
+    points = [Point2f(uniaxial_data.steel_ec[i], uniaxial_data.slab_ec[i]) for i in hull]
+    poly!(ax5, points, color=(色[:magenta], 0.02), transparency=true, strokewidth=0.5, strokecolor=色[:magenta], linestyle=:dash)
+
+    hull = andrew_hull(isotropic_data.steel_ec, isotropic_data.slab_ec)[1]
+    points = [Point2f(isotropic_data.steel_ec[i], isotropic_data.slab_ec[i]) for i in hull]
+    poly!(ax5, points, color=(色[:skyblue], 0.05), transparency=true, strokewidth=0.5, strokecolor=色[:skyblue], linestyle=:dash)
+
+
     # Add legends
     axislegend(ax1, [sk[:elem_usual], sk[:elem_optimal]], ["Uniform", "Cellular"], position=:cb, orientation=:horizontal, labelhalign=:left, framevisible=true, backgroundcolor=:white, framecolor=:white, labelsize=sk[:fontsize_small], patchsize=(2, 10), padding=(0, 0, 0, 0))
     axislegend(ax2, [sk[:elem_usual], sk[:elem_optimal]], ["Catalog (W)", "Continuous"], position=:cb, orientation=:horizontal, labelhalign=:left, framevisible=true, backgroundcolor=:white, framecolor=:white, labelsize=sk[:fontsize_small], patchsize=(2, 10), padding=(0, 0, 0, 0))
@@ -115,6 +135,11 @@ function plot_1_multiplot(df_all)
         vlines!(ax, bau_steel, color=:black, linestyle=:dash, transparency=true, linewidth=1)
         hlines!(ax, bau_slab, color=:black, linestyle=:dash, transparency=true, linewidth=1)
         lines!(ax, [bau_total, 0], [0, bau_total], color=:black, linestyle=:dash, transparency=true, linewidth=1)
+        if ax == ax5
+            text!(ax, 149, bau_slab[1] + 1, text="BAU slab", color = :black, align = (:right, :bottom), fontsize = sk[:fontsize_small])
+            text!(ax, bau_steel[1] + 3, 12, text="BAU steel", color = :black, rotation = pi/2, align = (:left, :center), fontsize = sk[:fontsize_small])
+            text!(ax, 3, bau_slab[1]+bau_steel[1]+1, text="BAU total", color = :black, rotation=-pi/4, align = (:left, :center), fontsize = sk[:fontsize_small])    
+        end
     end
 
     # Link axes

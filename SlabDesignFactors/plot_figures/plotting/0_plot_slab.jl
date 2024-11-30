@@ -53,37 +53,82 @@ function parse_sections(sections_str::String)
     return parsed_array
 end
 
-function plot_slab(self::SlabAnalysisParams, results::DataFrameRow=DataFrameRow())
+function parse_ids(ids_vector::Vector{SubString{String}})
+    parsed_ids = Vector{Any}(undef, length(ids_vector))
+    for (i, id) in enumerate(ids_vector)
+        parsed_ids[i] = replace(replace(replace(id, r"[\[\]]" => ""), "\"" => ""), "Any" => "")
+        parsed_ids[i] = strip(parsed_ids[i])
+    end
+    return string.(parsed_ids)
+end
+
+function plot_slab(self::SlabAnalysisParams, sections::Union{Vector{String}, Vector{Float64}})
 
     # Analyze the slab if it hasn't been analyzed yet
-    if !self.plot_context.plot || isempty(self.areas)
+    if !self.plot_context.plot || isempty(self.areas) || isnothing(self.plot_context.ax)
         self.plot_context.plot = true
         self = analyze_slab(self)
     end
 
     model = self.model
-    old_fig = self.plot_context.fig
     old_ax = self.plot_context.ax
 
     # Make a new figure and copy the axis
-    new_fig = Figure()
-    new_ax = Axis(new_fig[1,1])
+    new_fig = Figure(size=(600,400))
+    new_ax = Axis(new_fig[1,1], aspect=DataAspect())
+    old_ax = self.plot_context.ax
 
     new_ax = copy_axis(old_ax, new_ax, alpha=0.5, scatter=false, beams=false)
+    hidespines!(new_ax)
     
     # Copy relevant axis properties
     elements = self.model.elements[:beam]
-    sections = parse_sections(results.sections)
-    areas = [W_imperial(section).A for section in sections]
+    if typeof(sections) <: Vector{String}
+        areas = [W_imperial(section).A for section in sections]
+    else
+        areas = sections
+        sections = string.(sections)
+    end
 
-    area_range = (minimum(areas), maximum(areas))
+    area_range = (0, sqrt(maximum(areas)))
 
     for (i, element) in enumerate(elements)
         x = [element.nodeStart.position[1], element.nodeEnd.position[1]]
         y = [element.nodeStart.position[2], element.nodeEnd.position[2]]
         linewidth = sqrt(areas[i])
-        lines!(new_ax, x, y, linewidth=linewidth, color=areas[i], colorrange=area_range, colormap=Reverse(:greys))
 
+        # Calculate clipped line coordinates by moving inward from endpoints
+        # Get release type from element and determine DOFs
+        release_type = typeof(element).parameters[1]
+
+        start_dof = if release_type <: Union{Asap.FixedFixed, Asap.FixedFree}  && sum(element.nodeStart.dof[4:6]) == 0
+            [0,0,0,0,0,0] # Fixed start
+        else
+            [0,0,0,1,1,1] # Free start
+        end
+        end_dof = if release_type <: Union{Asap.FixedFixed, Asap.FreeFixed}  && sum(element.nodeEnd.dof[4:6]) == 0
+            [0,0,0,0,0,0] # Fixed end
+        else
+            [0,0,0,1,1,1] # Free end
+        end
+
+        # Default to no clipping for moment connections
+        clip_start = sum(start_dof[4:6]) == 0 ? 0 : 0.3  # Clip if rotation DOF is fixed
+        clip_end = sum(end_dof[4:6]) == 0 ? 0 : 0.3      # Clip if rotation DOF is fixed
+        
+        dx = x[2] - x[1]
+        dy = y[2] - y[1]
+        length = sqrt(dx^2 + dy^2)
+        
+        # Calculate parametric distances based on connection types
+        t1 = clip_start/length
+        t2 = (length-clip_end)/length
+        
+        x_clipped = [x[1] + t1*dx, x[1] + t2*dx]
+        y_clipped = [y[1] + t1*dy, y[1] + t2*dy]
+        lines!(new_ax, x_clipped, y_clipped, linewidth=linewidth, color=linewidth, colorrange=area_range, colormap=:BuPu)
+
+        # Text
         # Calculate midpoint coordinates
         mid_x = (x[1] + x[2]) / 2
         mid_y = (y[1] + y[2]) / 2
@@ -97,14 +142,48 @@ function plot_slab(self::SlabAnalysisParams, results::DataFrameRow=DataFrameRow(
             end
         end
         
-        # Add rotated text label at midpoint
-        text!(new_ax, mid_x, mid_y, text=sections[i], 
+        # Add rotated text label at midpoint with white glow effect
+        text!(new_ax, mid_x, mid_y, text=sections[i],
               rotation=rotation,
               align=(:center, :center),
-              fontsize=8)
+              fontsize=8,
+              color=:white,
+              strokewidth=3,
+              strokecolor=(:white, 0.8))
+        # Add text on top without stroke for better visibility
+        text!(new_ax, mid_x, mid_y, text=sections[i],
+              rotation=rotation, 
+              align=(:center, :center),
+              fontsize=8,
+              color=:black)
+    end
+
+    for node in model.nodes[:column]
+        scatter!(new_ax, node.position[1], node.position[2], color=:deeppink, markersize=8, marker=:rect)
     end
 
     display(new_fig)
 
 end
 
+function plot_slab(self::SlabAnalysisParams, results::DataFrameRow=DataFrameRow())
+
+    sections = parse_sections(results.sections)
+    return plot_slab(self, sections)
+
+end
+
+function plot_slab(self::SlabAnalysisParams, beam_sizing_params::SlabSizingParams)
+    
+    slab_params = analyze_slab(self);
+    slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
+    slab_results = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
+    if occursin("W", slab_results.ids[1])
+        sections = Vector{String}(slab_results.ids)
+    else
+        sections = parse.(Float64, slab_results.sections)
+    end
+
+    return plot_slab(slab_params, sections)
+
+end
