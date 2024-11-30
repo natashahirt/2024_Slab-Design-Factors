@@ -91,6 +91,8 @@ function assemble_data(files::Vector{String}; category_names::Vector{String}=Str
     df = filter(row -> row.area != 0, df)
     sort!(df, [:row, :col])
 
+    GC.gc()
+
     return df
 
 end

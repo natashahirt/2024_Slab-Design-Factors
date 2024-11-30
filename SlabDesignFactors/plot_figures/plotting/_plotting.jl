@@ -2,14 +2,20 @@ using DataFrames
 using CSV
 using Colors
 using CairoMakie
+using Statistics
 
 include("../../core/_core.jl")
 include("assemble_data.jl")
 include("utils.jl")
 
 # plot files
+include("0_plot_slab.jl")
 include("1_multiplot.jl")
 include("2_megaplot.jl")
 include("3_topology.jl")
 include("4_surface.jl")
-include("0_plot_slab.jl")
+include("5_beam_sizes.jl")
+include("6_depth.jl")
+include("7_fix_params.jl")
+include("8_stats_summary.jl")
+include("9_stats_topology.jl")

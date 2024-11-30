@@ -80,16 +80,16 @@ function plot_1_multiplot(df_all)
 
     # Create axes and scatter plots
     ax1 = Axis(grid_subplots[1, 1]; axis_kwargs...)
-    create_scatter(ax1, filter(row -> row.slab_sizer == "uniform", df_all), filter(row -> row.slab_sizer == "cellular", df_all), title="a) Slab sizing", ylabel="EC RC-slab kgCO2e/m²")
+    create_scatter(ax1, filter(row -> row.slab_sizer == "uniform", df_all), filter(row -> row.slab_sizer == "cellular", df_all), title="a) Slab sizing", ylabel="EC RC-slab [kgCO2e/m²]")
 
     ax2 = Axis(grid_subplots[1, 2]; axis_kwargs...)
     create_scatter(ax2, filter(row -> row.beam_sizer == "discrete", df_all), filter(row -> row.beam_sizer == "continuous", df_all), title="b) Beam sizing")
 
     ax3 = Axis(grid_subplots[2, 1]; axis_kwargs...)
-    create_scatter(ax3, filter(row -> row.collinear == true, df_all), filter(row -> row.collinear == false, df_all), title="c) Beam collinearity", xlabel="EC steel kgCO2e/m²", ylabel="EC RC-slab kgCO2e/m²")
+    create_scatter(ax3, filter(row -> row.collinear == true, df_all), filter(row -> row.collinear == false, df_all), title="c) Beam collinearity", xlabel="EC steel [kgCO2e/m²]", ylabel="EC RC-slab [kgCO2e/m²]")
 
     ax4 = Axis(grid_subplots[2, 2]; axis_kwargs...)
-    create_scatter(ax4, filter(row -> row.max_depth == 25, df_all), filter(row -> row.max_depth == 40, df_all), title="d) Assembly depth", xlabel="EC steel kgCO2e/m²")
+    create_scatter(ax4, filter(row -> row.max_depth == 25, df_all), filter(row -> row.max_depth == 40, df_all), title="d) Assembly depth", xlabel="EC steel [kgCO2e/m²]")
 
     ax5 = Axis(grid_slabtype[1, 1]; axis_kwargs...)
     isotropic_data = filter(row -> row.slab_type == "isotropic", df_all)
@@ -99,8 +99,8 @@ function plot_1_multiplot(df_all)
     uniaxial_data = filter(row -> row.slab_type == "uniaxial", df_all)
     scatter!(ax5, uniaxial_data.steel_ec, uniaxial_data.slab_ec, marker=:hline, color=(色[:magenta], 0.2), transparency=true, markersize=sk[:markersize_large], rotation=uniaxial_data.rotation)
     ax5.title = "e) Slab Types"
-    ax5.xlabel = "EC steel kgCO2e/m²"
-    ax5.ylabel = "EC RC-slab kgCO2e/m²"
+    ax5.xlabel = "EC steel [kgCO2e/m²]"
+    ax5.ylabel = "EC RC-slab [kgCO2e/m²]"
 
     hull = andrew_hull(orth_biaxial_data.steel_ec, orth_biaxial_data.slab_ec)[1]
     points = [Point2f(orth_biaxial_data.steel_ec[i], orth_biaxial_data.slab_ec[i]) for i in hull]
@@ -148,5 +148,8 @@ function plot_1_multiplot(df_all)
 
     di = DataInspector(fig)
 
-    return fig
+    display(fig)
+
+    GC.gc()
+
 end

@@ -68,17 +68,17 @@ function plot_2_megaplot(df_all)
     # Megaplot -- less than
     x_lim_max = 150
     y_lim_max =150
-    ax1 = Axis(scattergrid[1,1], xticks = collect(0:10:maximum(df_all.steel_ec)), title = "a) Full Dataset", aspect = DataAspect(), xlabel = "EC steel kgCO2e/m²", ylabel = "EC RC-slab kgCO2e/m²", limits=(0,x_lim_max,0,y_lim_max), yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize = fontsize)
+    ax1 = Axis(scattergrid[1,1], xticks = collect(0:10:maximum(df_all.steel_ec)), title = "a) Full Dataset", aspect = DataAspect(), xlabel = "EC steel [kgCO2e/m²]", ylabel = "EC RC-slab [kgCO2e/m²]", limits=(0,x_lim_max,0,y_lim_max), yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize = fontsize)
 
     x_lim_min = minimum(less_than_bau.steel_ec) * .9
     y_lim_min = minimum(less_than_bau.slab_ec) * .9
 
     ax2_limits = (x_lim_min,bau_steel * 1.1,y_lim_min,bau_slab*1.1)
-    ax2 = Axis(gradient_grid[1,1], yticks = collect(0:10:bau_slab), aspect=DataAspect(), title = "b) Element density (inset)", xlabel = "EC steel kgCO2e/m²", ylabel = "EC RC-slab kgCO2e/m²", yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize=fontsize, limits=ax2_limits)
+    ax2 = Axis(gradient_grid[1,1], yticks = collect(0:10:bau_slab), aspect=DataAspect(), title = "b) Element density (inset)", xlabel = "EC steel [kgCO2e/m²]", ylabel = "EC RC-slab [kgCO2e/m²]", yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize=fontsize, limits=ax2_limits)
     axislegend(ax1, [elem_t, elem_g, elem_s, elem_grey], ["Topology", "Grid", "Nova", "Non-standard"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor = :white, labelsize=9, patchsize = (2,10), padding=(0,0,0,0))
     axislegend(ax2, [elem_g, elem_s], ["Grid", "Nova"], position = :rb, orientation = :vertical, labelhalign = :right, framevisible = true, backgroundcolor= :white, framecolor = :white, labelsize=9, patchsize = (2,10), padding=(2,2,2,2))
 
-    ax3 = Axis(bargrid[1,1], title = "c) Ranked EC", xlabel = "EC kgCO2e/m²", limits=(0,maximum(df_all.total_ec),0,length(df_all.name)), yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize= fontsize)
+    ax3 = Axis(bargrid[1,1], title = "c) Ranked EC", xlabel = "EC [kgCO2e/m²]", limits=(0,maximum(df_all.total_ec),0,length(df_all.name)), yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize, titlesize= fontsize)
 
     # Iso-EC lines
     ec_lines = collect(range(1, maximum(df_all.total_ec) / 10)) .* 10
@@ -204,5 +204,6 @@ function plot_2_megaplot(df_all)
     # Display
     display(fig)
 
-    return fig
+    GC.gc()
+
 end

@@ -57,7 +57,7 @@ function plot_3_topology(df; category=nothing)
     # Create figure
     fig = Figure(size=(190*4, 190*2.5))
     grid = fig[1,1] = GridLayout()
-    ax1 = Axis(grid[1,1], ylabel="EC kgCO2e/m²", xticklabelrotation=pi/2, 
+    ax1 = Axis(grid[1,1], ylabel="EC [kgCO2e/m²]", xticklabelrotation=pi/2, 
                limits=(0, length(df_best.name) + 1, 0, maximum_ec), 
                xticks=(1:lastindex(df_best.name), df_best.rowcol), 
                yticklabelsize=11, xticklabelsize=11, xlabelsize=11, ylabelsize=11, titlesize=11)
@@ -116,6 +116,7 @@ function plot_3_topology(df; category=nothing)
     end
 
     display(fig)
-    #save("figures/topology.pdf", fig)
+    
+    GC.gc()
 
 end

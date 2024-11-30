@@ -213,6 +213,7 @@ begin
 
     # display
     display(fig)
-    #save("figures/megaplot.pdf", fig)
+    
+    GC.gc()
 
 end

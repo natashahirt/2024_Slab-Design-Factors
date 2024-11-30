@@ -61,8 +61,8 @@ function plot_4_surface(df; category::String="grid")
     rowsize!(grid, 1, Relative(2/3))
     rowsize!(grid_top, 1, Relative(2/3))
 
-    ax1 = Axis3(grid_surface[1, 1], title="Design space 3D", xlabel="x", ylabel="y", zlabel="Embodied Carbon kgCO2e/m²", zlabeloffset=40, azimuth=azimuth, xticks=x, yticks=y, aspect=(1, 1, 1), yticklabelsize=fontsize, xticklabelsize=fontsize, zticklabelsize=fontsize, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, titlesize=fontsize, limits=(0, maximum(x), 0, maximum(y), 0, maximum_ec))
-    ax2 = Axis(grid_surface[1, 2], title="Design space projected", xlabel="x", ylabel="y", aspect=DataAspect(), xticks=x, yticks=y, yticklabelsize=fontsize, xticklabelsize=fontsize, xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize)
+    ax1 = Axis3(grid_surface[1, 1], title="a) Design space 3D", xlabel="x", ylabel="y", zlabel="EC [kgCO2e/m²]", zlabeloffset=40, azimuth=azimuth, xticks=x, yticks=y, aspect=(1, 1, 1), yticklabelsize=fontsize, xticklabelsize=fontsize, zticklabelsize=fontsize, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, titlesize=fontsize, limits=(0, maximum(x), 0, maximum(y), 0, maximum_ec))
+    ax2 = Axis(grid_surface[1, 2], title="b) Design space projected", xlabel="x", ylabel="y", aspect=DataAspect(), xticks=x, yticks=y, yticklabelsize=fontsize, xticklabelsize=fontsize, xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize)
 
     n_contours = 20
 
@@ -78,7 +78,7 @@ function plot_4_surface(df; category::String="grid")
 
     ax2.yreversed = true
 
-    Colorbar(grid_surface[1, 3], limits=(minimum(z), maximum(z)), colormap=:dense, tellheight=false, label="EC kgCO2e/m²", labelsize=fontsize)
+    Colorbar(grid_surface[1, 3], limits=(minimum(z), maximum(z)), colormap=:dense, tellheight=false, label="EC [kgCO2e/m²]", labelsize=fontsize)
 
     # LINE SECTIONS
 
@@ -118,7 +118,7 @@ function plot_4_surface(df; category::String="grid")
     max_not_nan = maximum(filter(x -> !isnan(x) && x < maximum_ec, df.total_ec))
     yticks_50 = collect(0:50:max_not_nan)
     kwargs = (topspinevisible=false, rightspinevisible=false, yticks=yticks_50, yminorgridvisible=true, yticklabelsize=fontsize, xticklabelsize=fontsize, xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize)
-    ax_a = Axis(grid_sections[1, 1], title="Section A", ylabel="EC kgCO2e/m²", limits=(0.5, lastindex(section_points_a)+0.5, 0, max_not_nan), xticks=(collect(1:lastindex(section_points_a)), string.(section_points_a)); kwargs...)
+    ax_a = Axis(grid_sections[1, 1], title="Section A", ylabel="EC [kgCO2e/m²]", limits=(0.5, lastindex(section_points_a)+0.5, 0, max_not_nan), xticks=(collect(1:lastindex(section_points_a)), string.(section_points_a)); kwargs...)
     ax_b = Axis(grid_sections[1, 2], title="Section B", limits=(0.5, lastindex(section_points_b)+0.5, 0, max_not_nan), xticks=(collect(1:lastindex(section_points_b)), string.(section_points_b)); kwargs...)
 
     x_a = collect(1:length(section_points_a))
@@ -204,9 +204,11 @@ function plot_4_surface(df; category::String="grid")
 
     end
 
-    Colorbar(grid_smallmul[:, length(slab_types)+1], limits=(minimum_ec, maximum_ec), colormap=:dense, tellheight=true, label="EC kgCO2e/m²", labelsize=fontsize)
+    Colorbar(grid_smallmul[:, length(slab_types)+1], limits=(minimum_ec, maximum_ec), colormap=:dense, tellheight=true, label="EC [kgCO2e/m²]", labelsize=fontsize)
 
     display(fig)
+
+    GC.gc()
 
 end
 

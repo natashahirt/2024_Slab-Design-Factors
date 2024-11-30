@@ -164,6 +164,8 @@ function plot_slab(self::SlabAnalysisParams, sections::Union{Vector{String}, Vec
 
     display(new_fig)
 
+    GC.gc()
+
 end
 
 function plot_slab(self::SlabAnalysisParams, results::DataFrameRow=DataFrameRow())

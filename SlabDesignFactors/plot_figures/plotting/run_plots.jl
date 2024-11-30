@@ -7,8 +7,11 @@ plot_1_multiplot(df_all)
 plot_2_megaplot(df_all)
 plot_3_topology(df_all, category="topology")
 plot_4_surface(df_all, category="grid")
-plot_5_barplot_maxdepth(df_all, category="topology")
-plot_6_histogram_beamsizer(df_all, category="topology")
+plot_5_beam_sizes(df_all, category="topology")
+plot_6_depth(df_depths)
+plot_7_fix_params(df_fixed, df_unfixed)
+plot_8_stats_summary(df_all)
+plot_9_stats_topology(df_all)
 
 # Plot individual slabs
 
