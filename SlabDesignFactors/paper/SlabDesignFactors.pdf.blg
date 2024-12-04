@@ -1,5 +1,0 @@
-[0] Config.pm:307> INFO - This is Biber 2.19
-[0] Config.pm:310> INFO - Logfile is '/Users/tashahirt/Dropbox (MIT)/_MIT/DS Research/2024_Slab Design Factors/SlabDesignFactors/paper/SlabDesignFactors.pdf.blg'
-[82] biber-darwin:340> INFO - === Sun Nov 17, 2024, 20:05:57
-[280] Utils.pm:410> ERROR - Cannot find '/Users/tashahirt/Dropbox (MIT)/_MIT/DS Research/2024_Slab Design Factors/SlabDesignFactors/paper/SlabDesignFactors.pdf.bcf'!
-[282] Biber.pm:136> INFO - ERRORS: 1
