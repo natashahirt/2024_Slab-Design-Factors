@@ -3,7 +3,7 @@ Pkg.activate(".")
 
 # Load necessary packages for structural analysis and optimization
 using Asap, AsapToolkit, AsapOptim
-using CairoMakie, GLMakie
+using CairoMakie #, GLMakie
 using Nonconvex, Zygote
 using Statistics, Colors, DataFrames, CSV, JSON, Interpolations, StatsBase, UnPack
 

@@ -2,7 +2,7 @@
 
 begin    
     # Include necessary modules
-    include("../SlabDesignFactors.jl")
+    include("_scripts.jl")
 
     # Activate CairoMakie for plotting
     CairoMakie.activate!()
@@ -11,11 +11,11 @@ begin
     main_path = "SlabDesignFactors/jsons/topology/"  # Update this path as needed
     sub_paths = filter(x -> endswith(x, ".json"), readdir(main_path))
     sub_path = "r1c2.json"
-    path = main_path * sub_path
+    path = joinpath(main_path, sub_path)
     name = replace(sub_path, ".json" => "")
 
     # define path for saving results
-    results_path = "SlabDesignFactors/results/test_results/"
+    results_path = "SlabDesignFactors/results/remote_results_min/"
     results_name = name
 
     # Define slab parameters

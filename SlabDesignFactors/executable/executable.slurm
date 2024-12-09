@@ -6,13 +6,13 @@
 #SBATCH -C centos7
 #SBATCH -p sched_any
 #SBATCH -o outputs/output_%j.txt
-#SBATCH -e outputs/output_%j.txt
+#SBATCH -e outputs/error_%j.txt
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 #SBATCH --mail-user=nhirt@mit.edu
 
 # Set paths
-EXECUTABLE_PATH="SlabDesignFactors/executable/executable_experiments.jl"
-RESULTS_PATH="SlabDesignFactors/results/remote_results/"
+EXECUTABLE_PATH="SlabDesignFactors/executable/executable_analyze.jl"
+RESULTS_PATH="SlabDesignFactors/results/remote_results_min/"
 
 # Ensure output directories exist
 mkdir -p outputs
@@ -24,7 +24,7 @@ echo "Running Julia script..."
 julia -t 3 $EXECUTABLE_PATH $RESULTS_PATH
 
 # Check for completion file
-COMPLETION_FILE="$RESULTS_PATH/experiments_complete.txt"
+COMPLETION_FILE="$RESULTS_PATH/analysis_min_complete.txt"
 
 while [ ! -f "$COMPLETION_FILE" ]; do
     sleep 60  # Check every 60 seconds

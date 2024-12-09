@@ -3,7 +3,7 @@
 begin
 
     # Include necessary modules
-    include("../SlabDesignFactors.jl")
+    include("_scripts.jl")
 
     # Activate CairoMakie for plotting
     CairoMakie.activate!()
@@ -20,7 +20,7 @@ begin
     sub_paths = filter(x -> endswith(x, ".json"), readdir(main_path))
 
     results_path = "SlabDesignFactors/results/test_results/"
-    results_name = "test_multi_slab_orth_biaxial"
+    results_name = "multi_slab_orth_biaxial"
     
     results = SlabOptimResults[]
 

@@ -32,7 +32,7 @@ function analyze_experiments(results_path::String)
         :fix_params => [false]
     )
 
-    experiment_dicts = [experiment_max_depths, experiment_fix_params]
+    experiment_dicts = [experiment_fix_params]
 
     # Function to process a single set of parameters
     function process_params(json_path, results_path, experiment_dict)
