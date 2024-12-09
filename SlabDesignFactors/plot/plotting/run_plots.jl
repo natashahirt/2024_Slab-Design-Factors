@@ -1,25 +1,26 @@
 include("../../scripts/_scripts.jl")
+include("_plotting.jl")
 
 CairoMakie.activate!()
 
-df_all = assemble_data("SlabDesignFactors/results/processed_results/")
+df_all = assemble_data("SlabDesignFactors/results/processed_yesdeflection_noslabmin/")
 df_depths = assemble_data("SlabDesignFactors/results/processed_results/max_depths.csv")
 
-save_path = "SlabDesignFactors/plot_figures/figures/"
+save_path = "SlabDesignFactors/plot/figures/"
 
 fig = plot_1_multiplot(df_all)
-save(save_path * "1_multiplot.pdf", fig)
+save(save_path * "1_multiplot_nominslab.pdf", fig)
 
 fig = plot_2_megaplot(df_all)
-save(save_path * "2_megaplot.pdf", fig)
+save(save_path * "2_megaplot_nominslab.pdf", fig)
 
 fig = plot_3_topology(df_all, category="topology")
-save(save_path * "3_topology.pdf", fig)
+save(save_path * "3_topology_nominslab.pdf", fig)
 
 fig = plot_4_surface(df_all, category="grid")
-save(save_path * "4_surface_grid.pdf", fig)
+save(save_path * "4_surface_grid_nominslab.pdf", fig)
 fig = plot_4_surface(df_all, category="nova")
-save(save_path * "4_surface_nova.pdf", fig)
+save(save_path * "4_surface_nova_nominslab.pdf", fig)
 
 fig = plot_5_beam_sizes(df_all, category="topology")
 save(save_path * "5_beam_sizes_topology.pdf", fig)
@@ -127,8 +128,9 @@ end
 save(save_path * "0_slab_$(name).pdf", fig)
 
 # Fix the ids != sections bug when collinear was saved
-"""# Read CSV into DataFrame first to allow modification
-df = CSV.read("SlabDesignFactors/results/processed_results/nova.csv", DataFrame)
+# Read CSV into DataFrame first to allow modification
+file = "SlabDesignFactors/results/processed_yesdeflection_noslabmin/grid.csv"
+df = CSV.read(file, DataFrame)
 
 for i in 1:nrow(df)
     sections = parse_sections(String(df[i, :sections])) 
@@ -139,12 +141,12 @@ for i in 1:nrow(df)
 end
 
 # Write back to CSV if needed
-CSV.write("SlabDesignFactors/results/processed_results/nova.csv", df)
+CSV.write(file, df)
 
-for row in CSV.Rows("SlabDesignFactors/results/processed_results/nova.csv")
+for row in CSV.Rows(file)
     sections = parse_sections(String(row.sections)) # Convert PosLenString to String before parsing
     ids = parse_sections(String(row.ids))
     if sections != ids
         println(row.name)
     end
-end"""
+end
