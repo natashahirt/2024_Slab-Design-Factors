@@ -13,6 +13,7 @@
 *.psd
 *.3dm
 *.hdr
+*.csv
 
 SlabDesignFactors/results/past_results
 SlabDesignFactors/results/test_results
