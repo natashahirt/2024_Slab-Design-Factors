@@ -47,11 +47,11 @@ function analyze_all_jsons(results_path::String)
                     vector_1d = vector_1ds[i]
 
                     # Check if this configuration already exists in results file
-                    results_file = results_path * results_name * ".csv"
+                    results_file = joinpath(results_path, results_name * ".csv")
 
                     for sub_path in sub_paths
 
-                        path = json_path * sub_path
+                        path = joinpath(json_path, sub_path)
                         name = replace(sub_path, ".json" => "")  
 
                         if isfile(results_file)

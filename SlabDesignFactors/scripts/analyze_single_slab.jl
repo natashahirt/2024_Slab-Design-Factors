@@ -44,7 +44,10 @@ beam_sizing_params = SlabSizingParams(
 slab_params = analyze_slab(slab_params);
 slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
 slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
-print_forces(slab_results_discrete_noncollinear)
+slab_results_discrete_noncollinear.slab_name = "r1c2 test"
+slab_results_discrete_noncollinear.sections = []
+slab_results_discrete_noncollinear.ids = []
+append_results_to_csv("SlabDesignFactors/results/test_results/", "r1c2", [slab_results_discrete_noncollinear])
 
 slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear = iterate_discrete_continuous(slab_params, beam_sizing_params);
 save_results([slab_results_discrete_noncollinear, slab_results_discrete_collinear, slab_results_continuous_noncollinear, slab_results_continuous_collinear], subfolder = "SlabDesignFactors/results/test_results", filename = "test_binary_search")
