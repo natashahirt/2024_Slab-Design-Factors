@@ -17,5 +17,6 @@
 SlabDesignFactors/results/past_results
 SlabDesignFactors/results/test_results
 SlabDesignFactors/plot_figures/figures_raw*
+outputs/
 Manifest.toml
 Project.toml
