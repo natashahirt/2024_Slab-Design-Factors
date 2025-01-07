@@ -5,24 +5,23 @@ include("_scripts.jl")
 CairoMakie.activate!()
 
 # Define the path to the JSON file containing slab geometry
-path = "SlabDesignFactors/jsons/special/rhombus_8x12.json"  # Update this path as needed
-path = "SlabDesignFactors/jsons/special/test_drawn.json"
+path = "Geometries/special/triple_bay.json"  # Update this path as needed
+# path = "Geometries/special/weber_1.json"
 
 name = basename(splitext(path)[1])    # Name for the plot
-
 # Parse geometry from JSON
 geometry_dict = JSON.parse(JSON.parse(replace(read(path, String), "\\n" => ""), dicttype=Dict))
-geometry = generate_from_json(geometry_dict, plot=false, drawn=true);
+geometry = generate_from_json(geometry_dict, plot=true, drawn=true);
 
 # Analyze the slab to get dimensions
 slab_params = SlabAnalysisParams(
     geometry, 
     slab_name=name,
-    slab_type=:isotropic,
+    slab_type=:uniaxial,
     vector_1d=[1,0], 
     slab_sizer=:uniform,
     spacing=.1, 
-    plot_analysis=true,
+    plot_analysis=false,
     fix_param=true, 
     slab_units=:m,
 );
@@ -34,16 +33,27 @@ beam_sizing_params = SlabSizingParams(
     live_factor=1.6, # -
     dead_factor=1.2, # -
     beam_sizer=:discrete,
-    max_depth=25, # in
+    max_depth=40, # in
     beam_units=:in, # in, etc.
     serviceability_lim=360,
-    collinear=false,
-    minimum_continuous=true
+    collinear=true,
+    minimum_continuous=true,
 );
 
 slab_params = analyze_slab(slab_params);
+
 slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
-slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
+slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=true);
+print_forces(slab_results_discrete_noncollinear)
+append_results_to_csv("SlabDesignFactors/results/test_results/", "constructability", [slab_results_discrete_noncollinear])
+
+df = assemble_data("SlabDesignFactors/results/test_results/constructability.csv")
+df_slab = filter(row -> row.name == name && row.max_depth == 40 && row.beam_sizer == "discrete", df)
+fig = plot_slab(slab_params, df_slab, text=true, mini=true, background=false, collinear=false)
+save("SlabDesignFactors/plot/figures/constructability/40/$(name)_mini.pdf", fig)
+
+# ==============================
+
 slab_results_discrete_noncollinear.slab_name = "r1c2 test"
 slab_results_discrete_noncollinear.sections = []
 slab_results_discrete_noncollinear.ids = []

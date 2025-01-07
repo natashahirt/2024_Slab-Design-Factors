@@ -4,7 +4,7 @@ function plot_7_fix_params(df_fixed, df_unfixed)
     fontsize = 11
 
     fig = Figure(size=(190*3,190*3))
-    ax = Axis(fig[1,1], aspect=1, xlabel = "Fixed tributaries EC [kgCO2e/m²]", ylabel = "Stiffness-adjusted tributaries EC [kgCO2e/m²]",limits=(0,max_axis,0,max_axis),titlesize = fontsize, yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize)
+    ax = Axis(fig[1,1], aspect=1, xlabel = "Bisector method EC [kgCO2e/m²]", ylabel = "Stiffness-weighted method EC [kgCO2e/m²]",limits=(0,max_axis,0,max_axis),titlesize = fontsize, yticklabelsize = fontsize, xticklabelsize = fontsize, xlabelsize = fontsize, ylabelsize = fontsize)
 
     slab_types = ["isotropic", "orth_biaxial", "orth_biaxial", "uniaxial", "uniaxial", "uniaxial", "uniaxial"]
     vector_1ds = [[0.,0.], [1.,0.], [1.,1.], [1.,0.], [0.,1.], [1.,1.], [1.,-1.]]

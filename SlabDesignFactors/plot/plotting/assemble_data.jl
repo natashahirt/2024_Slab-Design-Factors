@@ -71,9 +71,15 @@ function assemble_data(files::Vector{String}; category_names::Vector{String}=Str
 
         end
 
-        split_name = split(row.name, r"(?<=\d)(?=\D)|(?<=\D)(?=\d)") # \d is decimal digit, \D is nondigit characters
-        row.row = parse(Int,split_name[2])
-        row.col = parse(Int,split_name[4])
+        # Check if name has format "rXcY" where X and Y are numbers
+        if occursin(r"^[a-zA-Z]?\d+[a-zA-Z]?\d+$", row.name)
+            split_name = split(row.name, r"(?<=\d)(?=\D)|(?<=\D)(?=\d)") # \d is decimal digit, \D is nondigit characters
+            row.row = parse(Int,split_name[2])
+            row.col = parse(Int,split_name[4])
+        else
+            row.row = 0
+            row.col = 0
+        end 
 
         # bump one up for the grid
         if contains(row.name, "x" )&& contains(row.name, "y")
@@ -88,7 +94,7 @@ function assemble_data(files::Vector{String}; category_names::Vector{String}=Str
 
     println("values: ",length(df.name))
 
-    df = filter(row -> row.area != 0, df)
+    df = filter(row -> row.area != 0 && !isnan(row.area), df)
     sort!(df, [:row, :col])
 
     GC.gc()
@@ -109,4 +115,16 @@ function assemble_data(file::String)
         # Single file case
         return assemble_data(String[(file)])
     end
+end
+
+function assemble_data(dfs::Vector{DataFrame}, category_name::String, boolean::Vector{Bool})
+
+    for (i,df) in enumerate(dfs)
+        df[!, category_name] .= boolean[i]
+    end
+
+    full_df = vcat(dfs...)
+
+    return full_df
+
 end

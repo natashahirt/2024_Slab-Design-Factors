@@ -29,3 +29,6 @@ Pkg.develop(path="./AsapOptim")
 # Resolve and precompile packages
 Pkg.resolve()
 Pkg.precompile()
+
+# Instantiate the project
+Pkg.instantiate()
