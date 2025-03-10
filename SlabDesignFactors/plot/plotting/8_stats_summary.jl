@@ -33,7 +33,7 @@ function create_slab_summary_table(df)
     end
 end
 
-"""# Example usage
+"""
 df = assemble_data("SlabDesignFactors/results/test_results/constructability.csv")
 
 # Get maximum and minimum total embodied carbon

@@ -1,11 +1,16 @@
 using Pkg
 Pkg.activate(".")
 
+using Revise
+
 # Load necessary packages for structural analysis and optimization
 using Asap, AsapToolkit, AsapOptim
-using CairoMakie #, GLMakie
+using CairoMakie
 using Nonconvex, Zygote
 using Statistics, Colors, DataFrames, CSV, JSON, Interpolations, StatsBase, UnPack
+
+# Load packages for websocket
+using HTTP
 
 # Load optimization methods
 Nonconvex.@load MMA
@@ -17,5 +22,3 @@ include("../../TributaryAreas/TributaryAreas.jl")
 include("../../VariableBeamOptimizer/VariableBeamOptimizer.jl")
 
 Pkg.status()
-
-println("Initialization of Slab_Design_Factors complete")

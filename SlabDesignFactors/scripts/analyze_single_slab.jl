@@ -5,8 +5,8 @@ include("_scripts.jl")
 CairoMakie.activate!()
 
 # Define the path to the JSON file containing slab geometry
-path = "Geometries/special/triple_bay.json"  # Update this path as needed
-# path = "Geometries/special/weber_1.json"
+# path = "Geometries/special/triple_bay.json"  # Update this path as needed
+path = "Geometries/special/weber_1_wall.json"
 
 name = basename(splitext(path)[1])    # Name for the plot
 # Parse geometry from JSON
@@ -18,18 +18,18 @@ slab_params = SlabAnalysisParams(
     geometry, 
     slab_name=name,
     slab_type=:uniaxial,
-    vector_1d=[1,0], 
+    vector_1d=[0,1], 
     slab_sizer=:uniform,
     spacing=.1, 
-    plot_analysis=false,
+    plot_analysis=true,
     fix_param=true, 
     slab_units=:m,
 );
 
 # Sizing parameters
 beam_sizing_params = SlabSizingParams(
-    live_load=psf_to_ksi(50), # ksi
-    superimposed_dead_load=psf_to_ksi(15), # ksi
+    live_load=psf_to_ksi(60), # ksi
+    superimposed_dead_load=psf_to_ksi(20), # ksi
     live_factor=1.6, # -
     dead_factor=1.2, # -
     beam_sizer=:discrete,
@@ -43,9 +43,12 @@ beam_sizing_params = SlabSizingParams(
 slab_params = analyze_slab(slab_params);
 
 slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
-slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=true);
+slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
 print_forces(slab_results_discrete_noncollinear)
-append_results_to_csv("SlabDesignFactors/results/test_results/", "constructability", [slab_results_discrete_noncollinear])
+slab_results_discrete_collinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=true);
+print_forces(slab_results_discrete_collinear)
+
+append_results_to_csv("SlabDesignFactors/results/test_results/", "constructability", [slab_results_discrete_noncollinear, slab_results_discrete_collinear])
 
 df = assemble_data("SlabDesignFactors/results/test_results/constructability.csv")
 df_slab = filter(row -> row.name == name && row.max_depth == 40 && row.beam_sizer == "discrete", df)

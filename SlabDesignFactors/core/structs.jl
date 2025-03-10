@@ -42,6 +42,8 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
     slab_depths::Vector{<:Real}   # Depth of each cell [-]
     plot_context::PlotContext      # Plot context
     load_dictionary::Dict{Any, Vector{Asap.AbstractLoad}}  # Dictionary comparing elements to loads
+    trib_dictionary::Dict{Any, Any}  # Dictionary mapping elements to vector of coordinate tuples
+    record_tributaries::Bool            # Whether to record lines
     slab_units::Symbol              # Unit of measurement for slab (:m, :mm, :in, :ft)
 
     function SlabAnalysisParams(model::Asap.Model; 
@@ -61,6 +63,8 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
                               slab_depths::Vector{<:Real}=Float64[],
                               plot_analysis::Bool=false,
                               load_dictionary::Dict{Any, Vector{Asap.AbstractLoad}}=Dict{Any, Vector{Asap.AbstractLoad}}(),
+                              trib_dictionary::Dict{Any, Any}=Dict{Any, Any}(),
+                              record_tributaries::Bool=false,
                               slab_units::Symbol=:m)
 
         @assert (slab_type in [:isotropic, :uniaxial, :orth_biaxial]) "Invalid slab type."
@@ -70,7 +74,7 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
         vector_1d = Float64.(vector_1d)
 
         new(model, slab_name, slab_type, vector_1d, perp, perp_vector_1d, slab_sizer, fix_param, spacing, area, areas, 
-            load_areas, load_volumes, max_spans, slab_depths, plot_context, load_dictionary, slab_units)
+            load_areas, load_volumes, max_spans, slab_depths, plot_context, load_dictionary, trib_dictionary, record_tributaries, slab_units)
     end
 end
 

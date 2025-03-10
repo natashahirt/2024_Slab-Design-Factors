@@ -15,10 +15,18 @@ df_minslabno = assemble_data("SlabDesignFactors/results/processed_$(deflection)d
 df_minslabyes = assemble_data("SlabDesignFactors/results/processed_$(deflection)deflection_yesslabmin/")
 
 df_combined = assemble_data([df_minslabno, df_minslabyes], "slab_min", [false, true])
-slab_filter = row -> row.name == name && row.slab_type == "uniaxial" && row.beam_sizer == "discrete" && row.vector_1d_x == 1 && row.vector_1d_y == 0 && row.slab_sizer == "uniform" && row.max_depth == 40 && row.collinear == true && row.slab_min == true
+slab_filter = row -> row.name == "r1c2" && row.slab_type == "uniaxial" && row.beam_sizer == "discrete" && row.vector_1d_x == 1 && row.vector_1d_y == 0 && row.slab_sizer == "uniform" && row.max_depth == 40 && row.collinear == true && row.slab_min == true
 bau_slab = filter(slab_filter, df_combined)[1,:]
 
-filter(row -> row.name == "r1c1", df_combined)
+bau_slab.total_ec
+
+manufacturable_filter = row -> row.beam_sizer == "discrete" && row.slab_sizer == "uniform" && row.collinear == true && row.slab_min == true
+
+manufacturable_slabs = filter(manufacturable_filter, df_combined)
+min_ec = minimum(manufacturable_slabs.total_ec)
+min_ec_row = df_combined[argmin(df_combined.steel_ec), :]
+
+pct_improvement = (bau_slab.total_ec - min_ec) / bau_slab.total_ec * 100
 
 # Count how many slabs have lower embodied carbon than business-as-usual
 n_better = count(row -> row.total_ec <= bau_slab.total_ec, eachrow(df_combined))

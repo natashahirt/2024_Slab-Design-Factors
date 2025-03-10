@@ -14,6 +14,7 @@
 *.3dm
 *.hdr
 *.csv
+*.json
 
 SlabDesignFactors/results/past_results
 SlabDesignFactors/results/test_results
