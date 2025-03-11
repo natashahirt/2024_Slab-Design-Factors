@@ -9,6 +9,8 @@ using Revise
 using Asap, AsapToolkit, AsapOptim
 using CairoMakie
 using Nonconvex, Zygote
+using JuMP: JuMP
+using GLPK
 using Statistics, Colors, DataFrames, CSV, JSON, Interpolations, StatsBase, UnPack
 
 # Load packages for websocket

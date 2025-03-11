@@ -103,7 +103,8 @@ mutable struct SlabSizingParams
     collinear::Union{Bool,Nothing}   # True if collinear members are sized together
     serviceability_lim::Real       # Divide length by limit to get serviceability
     catalog_discrete::Any           # Catalog for discrete sizing
-    
+    n_max_sections::Int            # Maximum number of sections per beam
+
     # calculated values
     area::Real                      # Area of the slab in beam units
     w::Real                      # Distributed load [load/area]
@@ -145,6 +146,7 @@ mutable struct SlabSizingParams
         beam_units::Symbol=:in,              # Unit of measurement for beams
         serviceability_lim::Real=360,    # Divide length by limit to get serviceability
         catalog_discrete::Any=allW_imperial(), # Catalog for discrete sizing
+        n_max_sections::Int=0,              # Maximum number of sections per beam
 
         # calculated values
         area::Real=0.0,                      # Area of the slab in beam units
@@ -172,7 +174,7 @@ mutable struct SlabSizingParams
 
         new(model, live_load, superimposed_dead_load, live_factor, dead_factor, beam_sizer, max_depth,
             beam_units, max_assembly_depth, deflection_limit, minimum_continuous, collinear,
-            serviceability_lim, catalog_discrete, area, w, self_weight, max_beam_depth, M_maxs, V_maxs,
+            serviceability_lim, catalog_discrete, n_max_sections, area, w, self_weight, max_beam_depth, M_maxs, V_maxs,
             x_maxs, load_dictionary, load_df, minimizers, minimums, ids, collinear_minimizers, collinear_ids,
             collinear_minimums, verbose)
     end
