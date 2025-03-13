@@ -5,4 +5,4 @@ To-do
 - [ ] Implement façade loads on perimeter beams
 - [x] Vector sorting for discrete beam sizing
 - [x] Integer programming for discrete beam sizing (plus catalog limits)
-- [ ] Continuous optimization framed as a single optimization problem
+- [x] Continuous optimization framed as a single optimization problem
