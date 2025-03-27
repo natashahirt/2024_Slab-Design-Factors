@@ -20,6 +20,7 @@ Nonconvex.@load NLopt
 
 # Include necessary modules for slab analysis and optimization
 include("../../SlabDesignFactors/core/_core.jl")
+include("../../SlabDesignFactors/plot/plotting/_plotting.jl")
 include("../../TributaryAreas/TributaryAreas.jl")
 include("../../VariableBeamOptimizer/VariableBeamOptimizer.jl")
 

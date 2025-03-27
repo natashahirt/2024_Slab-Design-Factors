@@ -28,6 +28,7 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
     model::Asap.Model               # The model
     slab_name::String               # Slab name
     slab_type::Symbol              # :uniaxial or :isotropic
+    load_type::Symbol              # :determinate or :indeterminate
     vector_1d::Vector{<:Real}      # Direction of uniaxial slab
     perp::Bool                    # Whether to use the perpendicular direction
     perp_vector_1d::Vector{<:Real} # Perpendicular direction of orth_biaxial slab
@@ -45,10 +46,13 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
     trib_dictionary::Dict{Any, Any}  # Dictionary mapping elements to vector of coordinate tuples
     record_tributaries::Bool            # Whether to record lines
     slab_units::Symbol              # Unit of measurement for slab (:m, :mm, :in, :ft)
+    raster_df::DataFrame            # DataFrame of raster points
+    element_id_lookup_df::Dict{Tuple{Int,Int}, Element} # DataFrame of element id lookup
 
     function SlabAnalysisParams(model::Asap.Model; 
                               slab_name::String="", 
                               slab_type::Symbol=:isotropic, 
+                              load_type::Symbol=:determinate,
                               vector_1d::Vector{<:Real}=[1.0, 0.0],
                               perp::Bool=false,
                               perp_vector_1d::Vector{<:Real}=[0.0, -1.0],
@@ -65,16 +69,20 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
                               load_dictionary::Dict{Any, Vector{Asap.AbstractLoad}}=Dict{Any, Vector{Asap.AbstractLoad}}(),
                               trib_dictionary::Dict{Any, Any}=Dict{Any, Any}(),
                               record_tributaries::Bool=false,
-                              slab_units::Symbol=:m)
+                              slab_units::Symbol=:m,
+                              raster_df::DataFrame=DataFrame(),
+                              element_id_lookup_df::Dict{Tuple{Int,Int}, Element}=Dict{Tuple{Int,Int}, Element}())
 
         @assert (slab_type in [:isotropic, :uniaxial, :orth_biaxial]) "Invalid slab type."
         @assert (slab_sizer in [:cellular, :uniform]) "Invalid slab sizing method."
-
+        @assert (load_type in [:determinate, :indeterminate]) "Invalid load type."
+        
         plot_context = PlotContext(plot_analysis, nothing, nothing)
         vector_1d = Float64.(vector_1d)
+        element_id_lookup_df = get_element_id(model)
 
-        new(model, slab_name, slab_type, vector_1d, perp, perp_vector_1d, slab_sizer, fix_param, spacing, area, areas, 
-            load_areas, load_volumes, max_spans, slab_depths, plot_context, load_dictionary, trib_dictionary, record_tributaries, slab_units)
+        new(model, slab_name, slab_type, load_type, vector_1d, perp, perp_vector_1d, slab_sizer, fix_param, spacing, area, areas, 
+            load_areas, load_volumes, max_spans, slab_depths, plot_context, load_dictionary, trib_dictionary, record_tributaries, slab_units, raster_df, element_id_lookup_df)
     end
 end
 
