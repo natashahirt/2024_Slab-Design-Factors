@@ -89,6 +89,7 @@ function plot_slab(self::SlabAnalysisParams, sections::Union{Vector{String}, Vec
     end
 
     hidespines!(new_ax)
+    hidedecorations!(new_ax)
     
     # Copy relevant axis properties
     elements = self.model.elements[:beam]
@@ -110,12 +111,18 @@ function plot_slab(self::SlabAnalysisParams, sections::Union{Vector{String}, Vec
 
     area_range = (0, sqrt(maximum(areas)))
 
+    # Check if area_range is valid
+    if area_range[1] == area_range[2]
+        # Adjust the range slightly or set a default color
+        area_range = (area_range[1], area_range[1] + 1e-5)
+    end
+
     # Plot each beam element
     for (i, element) in enumerate(elements)
         x = [element.nodeStart.position[1], element.nodeEnd.position[1]]
         y = [element.nodeStart.position[2], element.nodeEnd.position[2]]
-        linewidth = mini ? sqrt(areas[i]) / 2 : sqrt(areas[i])
-        color = sqrt(areas[i])
+        linewidth = mini ? sqrt(abs(areas[i])) / 2 : sqrt(abs(areas[i]))
+        color = sqrt(abs(areas[i]))
 
         # Calculate clipped line coordinates by moving inward from endpoints
         # Get release type from element and determine DOFs
@@ -316,7 +323,7 @@ end
 
 function plot_slab(self::SlabAnalysisParams, beam_sizing_params::SlabSizingParams; text=true, mini=false, background=true, collinear=nothing)
     
-    slab_results = postprocess_slab(self, beam_sizing_params, check_collinear=false);
+    slab_results = postprocess_slab(self, beam_sizing_params, check_collinear=false, concise=true);
     if occursin("W", slab_results.ids[1])
         sections = Vector{String}(slab_results.ids)
     else
