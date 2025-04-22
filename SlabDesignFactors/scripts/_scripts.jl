@@ -7,6 +7,8 @@ using Revise
 using Asap, AsapToolkit, AsapOptim
 using CairoMakie
 using Nonconvex, Zygote
+using JuMP: JuMP
+using GLPK, Ipopt
 using Statistics, Colors, DataFrames, CSV, JSON, Interpolations, StatsBase, UnPack
 
 # Load packages for websocket
@@ -18,6 +20,7 @@ Nonconvex.@load NLopt
 
 # Include necessary modules for slab analysis and optimization
 include("../../SlabDesignFactors/core/_core.jl")
+include("../../SlabDesignFactors/plot/plotting/_plotting.jl")
 include("../../TributaryAreas/TributaryAreas.jl")
 include("../../VariableBeamOptimizer/VariableBeamOptimizer.jl")
 

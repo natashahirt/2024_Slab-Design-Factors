@@ -38,13 +38,21 @@ beam_sizing_params = SlabSizingParams(
     serviceability_lim=360,
     collinear=true,
     minimum_continuous=true,
+    n_max_sections=0,
 );
 
 slab_params = analyze_slab(slab_params);
 
+start_time = time()
 slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
+elapsed_time = time() - start_time
+println("Time elapsed for optimal_beamsizer: $(round(elapsed_time, digits=2)) seconds")
+
+#slab_params, beam_sizing_params = iterate_discrete_continuous(slab_params, beam_sizing_params);
+
 slab_results_discrete_noncollinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
 print_forces(slab_results_discrete_noncollinear)
+
 slab_results_discrete_collinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=true);
 print_forces(slab_results_discrete_collinear)
 

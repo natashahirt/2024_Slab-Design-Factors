@@ -16,7 +16,7 @@ geometry = generate_from_json(geometry_dict, plot=true, drawn=false);
 
 h = 8
 w = 12
-resolution = 5
+resolution = 10
 geometry = generate_ground_structure(h, w, resolution, plot=true);
 name = "ground_structure_$(h)_$(w)_$(resolution)"
 
@@ -78,7 +78,7 @@ scatter(Point2f.(centerpoint_coords), color=:red, markersize=8, axis=(limits=(0,
 for loop in 1:10
 
     # Create directory if it doesn't exist
-    dir = "Documentation/250327_Topopt Loop $(slab_params.slab_name)_vanishing_0.383"
+    dir = "Documentation/250327_Topopt Loop $(slab_params.slab_name)"
     mkpath(dir)
 
     function get_volume(minimizers, model)
@@ -144,7 +144,7 @@ for loop in 1:10
 end
 
 
-slab_params_topopt, beam_sizing_params_topopt = optimize_indeterminate(slab_params, beam_sizing_params);
+slab_params_topopt, beam_sizing_params_topopt = optimize_indeterminate(slab_params, beam_sizing_params, initial_vars = results_list[end].minimizers);
 fig = plot_slab(slab_params_topopt, beam_sizing_params_topopt, text=false, mini=false, background=false, collinear=false)
 
 
@@ -239,5 +239,3 @@ results.minimizers
 results.embodied_carbon_beams
 
 fig = plot_slab(slab_params, beam_sizing_params, text=false, mini=false, background=false, collinear=false)
-
-fig = plot_centerpoint_lines(slab_params; centerpoint_id=0, reset_plot=true, text=false)

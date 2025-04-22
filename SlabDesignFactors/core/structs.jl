@@ -28,6 +28,7 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
     model::Asap.Model               # The model
     slab_name::String               # Slab name
     slab_type::Symbol              # :uniaxial or :isotropic
+    load_type::Symbol              # :determinate or :indeterminate
     vector_1d::Vector{<:Real}      # Direction of uniaxial slab
     perp::Bool                    # Whether to use the perpendicular direction
     perp_vector_1d::Vector{<:Real} # Perpendicular direction of orth_biaxial slab
@@ -45,10 +46,13 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
     trib_dictionary::Dict{Any, Any}  # Dictionary mapping elements to vector of coordinate tuples
     record_tributaries::Bool            # Whether to record lines
     slab_units::Symbol              # Unit of measurement for slab (:m, :mm, :in, :ft)
+    raster_df::DataFrame            # DataFrame of raster points
+    element_id_lookup_df::Dict{Tuple{Int,Int}, Element} # DataFrame of element id lookup
 
     function SlabAnalysisParams(model::Asap.Model; 
                               slab_name::String="", 
                               slab_type::Symbol=:isotropic, 
+                              load_type::Symbol=:determinate,
                               vector_1d::Vector{<:Real}=[1.0, 0.0],
                               perp::Bool=false,
                               perp_vector_1d::Vector{<:Real}=[0.0, -1.0],
@@ -65,16 +69,20 @@ mutable struct SlabAnalysisParams <: AbstractOptParams
                               load_dictionary::Dict{Any, Vector{Asap.AbstractLoad}}=Dict{Any, Vector{Asap.AbstractLoad}}(),
                               trib_dictionary::Dict{Any, Any}=Dict{Any, Any}(),
                               record_tributaries::Bool=false,
-                              slab_units::Symbol=:m)
+                              slab_units::Symbol=:m,
+                              raster_df::DataFrame=DataFrame(),
+                              element_id_lookup_df::Dict{Tuple{Int,Int}, Element}=Dict{Tuple{Int,Int}, Element}())
 
         @assert (slab_type in [:isotropic, :uniaxial, :orth_biaxial]) "Invalid slab type."
         @assert (slab_sizer in [:cellular, :uniform]) "Invalid slab sizing method."
-
+        @assert (load_type in [:determinate, :indeterminate]) "Invalid load type."
+        
         plot_context = PlotContext(plot_analysis, nothing, nothing)
         vector_1d = Float64.(vector_1d)
+        element_id_lookup_df = get_element_id(model)
 
-        new(model, slab_name, slab_type, vector_1d, perp, perp_vector_1d, slab_sizer, fix_param, spacing, area, areas, 
-            load_areas, load_volumes, max_spans, slab_depths, plot_context, load_dictionary, trib_dictionary, record_tributaries, slab_units)
+        new(model, slab_name, slab_type, load_type, vector_1d, perp, perp_vector_1d, slab_sizer, fix_param, spacing, area, areas, 
+            load_areas, load_volumes, max_spans, slab_depths, plot_context, load_dictionary, trib_dictionary, record_tributaries, slab_units, raster_df, element_id_lookup_df)
     end
 end
 
@@ -103,7 +111,8 @@ mutable struct SlabSizingParams
     collinear::Union{Bool,Nothing}   # True if collinear members are sized together
     serviceability_lim::Real       # Divide length by limit to get serviceability
     catalog_discrete::Any           # Catalog for discrete sizing
-    
+    n_max_sections::Int            # Maximum number of sections per beam
+
     # calculated values
     area::Real                      # Area of the slab in beam units
     w::Real                      # Distributed load [load/area]
@@ -145,6 +154,7 @@ mutable struct SlabSizingParams
         beam_units::Symbol=:in,              # Unit of measurement for beams
         serviceability_lim::Real=360,    # Divide length by limit to get serviceability
         catalog_discrete::Any=allW_imperial(), # Catalog for discrete sizing
+        n_max_sections::Int=0,              # Maximum number of sections per beam
 
         # calculated values
         area::Real=0.0,                      # Area of the slab in beam units
@@ -172,7 +182,7 @@ mutable struct SlabSizingParams
 
         new(model, live_load, superimposed_dead_load, live_factor, dead_factor, beam_sizer, max_depth,
             beam_units, max_assembly_depth, deflection_limit, minimum_continuous, collinear,
-            serviceability_lim, catalog_discrete, area, w, self_weight, max_beam_depth, M_maxs, V_maxs,
+            serviceability_lim, catalog_discrete, n_max_sections, area, w, self_weight, max_beam_depth, M_maxs, V_maxs,
             x_maxs, load_dictionary, load_df, minimizers, minimums, ids, collinear_minimizers, collinear_ids,
             collinear_minimums, verbose)
     end

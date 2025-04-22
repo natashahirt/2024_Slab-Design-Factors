@@ -72,12 +72,6 @@ end
 
 function plot_slab(self::SlabAnalysisParams, sections::Union{Vector{String}, Vector{Float64}, Vector{Any}}; text=true, mini=false, background=true, collinear=false)
 
-    # Analyze the slab if it hasn't been analyzed yet
-    if !self.plot_context.plot || isempty(self.areas) || isnothing(self.plot_context.ax)
-        self.plot_context.plot = true
-        self = analyze_slab(self)
-    end
-
     model = self.model
 
         # Make a new figure and copy the axis
@@ -95,6 +89,7 @@ function plot_slab(self::SlabAnalysisParams, sections::Union{Vector{String}, Vec
     end
 
     hidespines!(new_ax)
+    hidedecorations!(new_ax)
     
     # Copy relevant axis properties
     elements = self.model.elements[:beam]
@@ -115,6 +110,12 @@ function plot_slab(self::SlabAnalysisParams, sections::Union{Vector{String}, Vec
     end
 
     area_range = (0, sqrt(maximum(areas)))
+
+    # Check if area_range is valid
+    if area_range[1] == area_range[2]
+        # Adjust the range slightly or set a default color
+        area_range = (area_range[1], area_range[1] + 1e-5)
+    end
 
     # Plot each beam element
     for (i, element) in enumerate(elements)
@@ -327,9 +328,7 @@ end
 
 function plot_slab(self::SlabAnalysisParams, beam_sizing_params::SlabSizingParams; text=true, mini=false, background=true, collinear=nothing)
     
-    slab_params = analyze_slab(self);
-    slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
-    slab_results = postprocess_slab(slab_params, beam_sizing_params, check_collinear=false);
+    slab_results = postprocess_slab(self, beam_sizing_params, check_collinear=false, concise=true);
     if occursin("W", slab_results.ids[1])
         sections = Vector{String}(slab_results.ids)
     else
