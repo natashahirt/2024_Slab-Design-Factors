@@ -118,164 +118,169 @@ function plot_slab(self::SlabAnalysisParams, sections::Union{Vector{String}, Vec
 
     # Plot each beam element
     for (i, element) in enumerate(elements)
-        x = [element.nodeStart.position[1], element.nodeEnd.position[1]]
-        y = [element.nodeStart.position[2], element.nodeEnd.position[2]]
-        linewidth = mini ? sqrt(areas[i]) / 2 : sqrt(areas[i])
-        color = sqrt(areas[i])
+        if areas[i] > 0
 
-        # Calculate clipped line coordinates by moving inward from endpoints
-        # Get release type from element and determine DOFs
-        release_type = typeof(element).parameters[1]
+            x = [element.nodeStart.position[1], element.nodeEnd.position[1]]
+            y = [element.nodeStart.position[2], element.nodeEnd.position[2]]
+            linewidth = mini ? sqrt(areas[i]) / 2 : sqrt(areas[i])
+            color = sqrt(areas[i])
 
-        start_dof = if release_type <: Union{Asap.FixedFixed, Asap.FixedFree}  && sum(element.nodeStart.dof[4:6]) == 0
-            [0,0,0,0,0,0] # Fixed start
-        else
-            [0,0,0,1,1,1] # Free start
-        end
-        end_dof = if release_type <: Union{Asap.FixedFixed, Asap.FreeFixed}  && sum(element.nodeEnd.dof[4:6]) == 0
-            [0,0,0,0,0,0] # Fixed end
-        else
-            [0,0,0,1,1,1] # Free end
-        end
+            # Calculate clipped line coordinates by moving inward from endpoints
+            # Get release type from element and determine DOFs
+            release_type = typeof(element).parameters[1]
 
-        # Default to no clipping for moment connections
-        if mini
-            clip_amount = 1
-        else
-            clip_amount = 0.3
-        end
-
-        clip_start = sum(start_dof[4:6]) == 0 ? 0 : clip_amount  # Clip if rotation DOF is fixed
-        clip_end = sum(end_dof[4:6]) == 0 ? 0 : clip_amount      # Clip if rotation DOF is fixed
-        
-        dx = x[2] - x[1]
-        dy = y[2] - y[1]
-        element_length = sqrt(dx^2 + dy^2)
-        
-        # Calculate parametric distances based on connection types
-        t1 = clip_start/element_length
-        t2 = (element_length-clip_end)/element_length
-        
-        x_clipped = [x[1] + t1*dx, x[1] + t2*dx]
-        y_clipped = [y[1] + t1*dy, y[1] + t2*dy]
-        lines!(new_ax, x_clipped, y_clipped, linewidth=linewidth, color=color, colorrange=area_range, colormap=:BuPu)
-
-        # Calculate the length of the beam
-        element_length = sqrt(dx^2 + dy^2)
-
-        # Text
-        # Calculate midpoint coordinates
-        mid_x = (x[1] + x[2]) / 2
-        mid_y = (y[1] + y[2]) / 2
-        
-        # Calculate rotation angle in radians
-        rotation = let θ = atan((y[2] - y[1]), (x[2] - x[1]))
-            if abs(θ - π/4) < 0.1
-                π/4  # Positive 45 degrees
-            elseif abs(θ + π/4) < 0.1
-                -π/4 # Negative 45 degrees
-            elseif θ > π/2 || θ < -π/2
-                θ + π 
-            elseif abs(θ - π/2) < 0.1 || abs(θ + π/2) < 0.1
-                π/2  # Ensure vertical text faces left
+            start_dof = if release_type <: Union{Asap.FixedFixed, Asap.FixedFree}  && sum(element.nodeStart.dof[4:6]) == 0
+                [0,0,0,0,0,0] # Fixed start
             else
-                θ
+                [0,0,0,1,1,1] # Free start
             end
-        end
+            end_dof = if release_type <: Union{Asap.FixedFixed, Asap.FreeFixed}  && sum(element.nodeEnd.dof[4:6]) == 0
+                [0,0,0,0,0,0] # Fixed end
+            else
+                [0,0,0,1,1,1] # Free end
+            end
 
-        if text
+            # Default to no clipping for moment connections
+            if mini
+                clip_amount = 1
+            else
+                clip_amount = 0.3
+            end
+
+            clip_start = sum(start_dof[4:6]) == 0 ? 0 : clip_amount  # Clip if rotation DOF is fixed
+            clip_end = sum(end_dof[4:6]) == 0 ? 0 : clip_amount      # Clip if rotation DOF is fixed
             
-            if collinear
+            dx = x[2] - x[1]
+            dy = y[2] - y[1]
+            element_length = sqrt(dx^2 + dy^2)
+            
+            # Calculate parametric distances based on connection types
+            t1 = clip_start/element_length
+            t2 = (element_length-clip_end)/element_length
+            
+            x_clipped = [x[1] + t1*dx, x[1] + t2*dx]
+            y_clipped = [y[1] + t1*dy, y[1] + t2*dy]
+            lines!(new_ax, x_clipped, y_clipped, linewidth=linewidth, color=color, colorrange=area_range, colormap=:BuPu)
 
-                collinear_groups = collect(1:length(elements))
-                for i in 1:lastindex(elements)
+            # Calculate the length of the beam
+            element_length = sqrt(dx^2 + dy^2)
 
-                    typeof_i = typeof(elements[i]).parameters[1]
-
-                    if typeof_i <: Union{Asap.FreeFree}
-                        continue
-                    end
-
-                    for j in i+1:lastindex(elements)
-
-                        typeof_j = typeof(elements[j]).parameters[1]
-
-                        if typeof_j <: Union{Asap.FreeFree}
-                            continue
-                        end
-                    
-                        i_nodestart = elements[i].nodeStart.nodeID
-                        i_nodeend = elements[i].nodeEnd.nodeID
-                        j_nodestart = elements[j].nodeStart.nodeID
-                        j_nodeend = elements[j].nodeEnd.nodeID
-
-                        # Check each possible node pairing to find shared node
-                        if i_nodestart == j_nodestart
-                            if elements[i].nodeStart.dof[4:6] == [1,1,1] || elements[i].nodeStart.id == :column || typeof_i <: Union{Asap.FreeFixed, Asap.FreeFree} || typeof_j <: Union{Asap.FreeFixed, Asap.FreeFree}
-                                continue
-                            end
-                        elseif i_nodestart == j_nodeend
-                            if elements[i].nodeStart.dof[4:6] == [1,1,1] || elements[i].nodeStart.id == :column || typeof_i <: Union{Asap.FreeFixed, Asap.FreeFree} || typeof_j <: Union{Asap.FixedFree, Asap.FreeFree}
-                                continue
-                            end
-                        elseif i_nodeend == j_nodestart
-                            if elements[i].nodeEnd.dof[4:6] == [1,1,1] || elements[i].nodeEnd.id == :column || typeof_i <: Union{Asap.FixedFree, Asap.FreeFree} || typeof_j <: Union{Asap.FreeFixed, Asap.FreeFree}
-                                continue
-                            end
-                        elseif i_nodeend == j_nodeend
-                            if elements[i].nodeEnd.dof[4:6] == [1,1,1] || elements[i].nodeEnd.id == :column || typeof_i <: Union{Asap.FixedFree, Asap.FreeFree} || typeof_j <: Union{Asap.FixedFree, Asap.FreeFree}
-                                continue
-                            end
-                        else
-                            continue
-                        end
-
-                        if check_collinearity(elements[i], elements[j])
-                            collinear_groups[j] = collinear_groups[i]
-                        end
-                    end
+            # Text
+            # Calculate midpoint coordinates
+            mid_x = (x[1] + x[2]) / 2
+            mid_y = (y[1] + y[2]) / 2
+            
+            # Calculate rotation angle in radians
+            rotation = let θ = atan((y[2] - y[1]), (x[2] - x[1]))
+                if abs(θ - π/4) < 0.1
+                    π/4  # Positive 45 degrees
+                elseif abs(θ + π/4) < 0.1
+                    -π/4 # Negative 45 degrees
+                elseif θ > π/2 || θ < -π/2
+                    θ + π 
+                elseif abs(θ - π/2) < 0.1 || abs(θ + π/2) < 0.1
+                    π/2  # Ensure vertical text faces left
+                else
+                    θ
                 end
+            end
 
-                # Find the middle of the collinear group
-                group_indices = findall(x -> x == collinear_groups[i], collinear_groups)
-                mid_index = group_indices[Int(ceil(length(group_indices) / 2))]
+            if text
+                
+                if collinear
 
-                group_length = sqrt((elements[group_indices[1]].nodeStart.position[1] - elements[group_indices[end]].nodeEnd.position[1])^2 + (elements[group_indices[1]].nodeStart.position[2] - elements[group_indices[end]].nodeEnd.position[2])^2)
+                    collinear_groups = collect(1:length(elements))
+                    for i in 1:lastindex(elements)
 
-                if i == mid_index
-                    
-                    if iseven(length(group_indices))
-                        # Determine font size based on beam length
-                        base_fontsize = 8
-                        multiplier = mini ? 1.5 : 2
-                        fontsize = max(4, min(base_fontsize, element_length  * multiplier))
+                        typeof_i = typeof(elements[i]).parameters[1]
 
-                        # Calculate midpoint coordinates for the middle beam
-                        mid_x = (elements[mid_index].nodeStart.position[1] + elements[mid_index].nodeEnd.position[1]) / 2
-                        mid_y = (elements[mid_index].nodeStart.position[2] + elements[mid_index].nodeEnd.position[2]) / 2
-                    else
-                        # Determine font size based on group length
-                        base_fontsize = 8
-                        multiplier = mini ? 1.5 : 2
-                        fontsize = max(4, min(base_fontsize, group_length  * multiplier))
+                        if typeof_i <: Union{Asap.FreeFree}
+                            continue
+                        end
 
-                        # Calculate midpoint coordinates for the collinear group
-                        mid_x = mean([elements[k].nodeStart.position[1] + elements[k].nodeEnd.position[1] for k in group_indices]) / 2
-                        mid_y = mean([elements[k].nodeStart.position[2] + elements[k].nodeEnd.position[2] for k in group_indices]) / 2
+                        for j in i+1:lastindex(elements)
+
+                            typeof_j = typeof(elements[j]).parameters[1]
+
+                            if typeof_j <: Union{Asap.FreeFree}
+                                continue
+                            end
+                        
+                            i_nodestart = elements[i].nodeStart.nodeID
+                            i_nodeend = elements[i].nodeEnd.nodeID
+                            j_nodestart = elements[j].nodeStart.nodeID
+                            j_nodeend = elements[j].nodeEnd.nodeID
+
+                            # Check each possible node pairing to find shared node
+                            if i_nodestart == j_nodestart
+                                if elements[i].nodeStart.dof[4:6] == [1,1,1] || elements[i].nodeStart.id == :column || typeof_i <: Union{Asap.FreeFixed, Asap.FreeFree} || typeof_j <: Union{Asap.FreeFixed, Asap.FreeFree}
+                                    continue
+                                end
+                            elseif i_nodestart == j_nodeend
+                                if elements[i].nodeStart.dof[4:6] == [1,1,1] || elements[i].nodeStart.id == :column || typeof_i <: Union{Asap.FreeFixed, Asap.FreeFree} || typeof_j <: Union{Asap.FixedFree, Asap.FreeFree}
+                                    continue
+                                end
+                            elseif i_nodeend == j_nodestart
+                                if elements[i].nodeEnd.dof[4:6] == [1,1,1] || elements[i].nodeEnd.id == :column || typeof_i <: Union{Asap.FixedFree, Asap.FreeFree} || typeof_j <: Union{Asap.FreeFixed, Asap.FreeFree}
+                                    continue
+                                end
+                            elseif i_nodeend == j_nodeend
+                                if elements[i].nodeEnd.dof[4:6] == [1,1,1] || elements[i].nodeEnd.id == :column || typeof_i <: Union{Asap.FixedFree, Asap.FreeFree} || typeof_j <: Union{Asap.FixedFree, Asap.FreeFree}
+                                    continue
+                                end
+                            else
+                                continue
+                            end
+
+                            if check_collinearity(elements[i], elements[j])
+                                collinear_groups[j] = collinear_groups[i]
+                            end
+                        end
                     end
+
+                    # Find the middle of the collinear group
+                    group_indices = findall(x -> x == collinear_groups[i], collinear_groups)
+                    mid_index = group_indices[Int(ceil(length(group_indices) / 2))]
+
+                    group_length = sqrt((elements[group_indices[1]].nodeStart.position[1] - elements[group_indices[end]].nodeEnd.position[1])^2 + (elements[group_indices[1]].nodeStart.position[2] - elements[group_indices[end]].nodeEnd.position[2])^2)
+
+                    if i == mid_index
+                        
+                        if iseven(length(group_indices))
+                            # Determine font size based on beam length
+                            base_fontsize = 8
+                            multiplier = mini ? 1.5 : 2
+                            fontsize = max(4, min(base_fontsize, element_length  * multiplier))
+
+                            # Calculate midpoint coordinates for the middle beam
+                            mid_x = (elements[mid_index].nodeStart.position[1] + elements[mid_index].nodeEnd.position[1]) / 2
+                            mid_y = (elements[mid_index].nodeStart.position[2] + elements[mid_index].nodeEnd.position[2]) / 2
+                        else
+                            # Determine font size based on group length
+                            base_fontsize = 8
+                            multiplier = mini ? 1.5 : 2
+                            fontsize = max(4, min(base_fontsize, group_length  * multiplier))
+
+                            # Calculate midpoint coordinates for the collinear group
+                            mid_x = mean([elements[k].nodeStart.position[1] + elements[k].nodeEnd.position[1] for k in group_indices]) / 2
+                            mid_y = mean([elements[k].nodeStart.position[2] + elements[k].nodeEnd.position[2] for k in group_indices]) / 2
+                        end
+
+                        push!(text_plots, (mid_x, mid_y, sections[i], rotation, fontsize))
+
+                    end
+                else
+                    # Determine font size based on beam length
+                    base_fontsize = 8
+                    multiplier = mini ? 1.5 : 2
+                    fontsize = max(4, min(base_fontsize, element_length  * multiplier))
 
                     push!(text_plots, (mid_x, mid_y, sections[i], rotation, fontsize))
-
                 end
-            else
-                # Determine font size based on beam length
-                base_fontsize = 8
-                multiplier = mini ? 1.5 : 2
-                fontsize = max(4, min(base_fontsize, element_length  * multiplier))
-
-                push!(text_plots, (mid_x, mid_y, sections[i], rotation, fontsize))
             end
+
         end
+        
     end
 
     for text_plot in text_plots
