@@ -26,7 +26,7 @@ function assemble_data(files::Vector{String}; category_names::Vector{String}=Str
         @assert length(category_names) == length(files) "You need the same number of category names as files"
     end
 
-    df = DataFrame(category=String[], name=String[], area=Float64[], steel_norm=Float64[], concrete_norm=Float64[], rebar_norm=Float64[], max_depth=Float64[], slab_type=Symbol[], slab_sizer=Symbol[], beam_sizer=Symbol[], collinear=Bool[], symbol=Symbol[], rotation=Float64[], vector_1d_x=Float64[], vector_1d_y=Float64[], sections=Any[], ids=Any[])
+    df = DataFrame(category=String[], name=String[], area=Float64[], steel_norm=Float64[], concrete_norm=Float64[], rebar_norm=Float64[], max_depth=Float64[], slab_type=Symbol[], slab_sizer=Symbol[], beam_sizer=Symbol[], collinear=Bool[], symbol=Symbol[], rotation=Float64[], vector_1d_x=Float64[], vector_1d_y=Float64[], sections=Any[], ids=Any[], unique_sections=Int64[])
 
     for (i,filename) in enumerate(files)
 
@@ -34,6 +34,9 @@ function assemble_data(files::Vector{String}; category_names::Vector{String}=Str
         df_slab.symbol .= :circle
         df_slab.rotation .= 0.
         df_slab.category .= category_names[i]
+        if !hasproperty(df_slab, :unique_sections)
+            df_slab.unique_sections .= 0
+        end
 
         df = vcat(df, df_slab)
     
@@ -103,7 +106,7 @@ function assemble_data(files::Vector{String}; category_names::Vector{String}=Str
 
 end
 
-function assemble_data(file::String)
+ function assemble_data(file::String)
     if isdir(file) || !endswith(file, ".csv")
         # Get all CSV files in directory
         files = filter(f -> endswith(f, ".csv"), readdir(file))

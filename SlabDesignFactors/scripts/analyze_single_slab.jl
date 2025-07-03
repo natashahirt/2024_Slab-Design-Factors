@@ -6,19 +6,20 @@ CairoMakie.activate!()
 
 # Define the path to the JSON file containing slab geometry
 # path = "Geometries/special/triple_bay.json"  # Update this path as needed
-path = "Geometries/special/weber_1_wall.json"
+path = "Geometries/special/triple_bay_drawn.json"
+path = "Geometries/topology/r1c2.json"
 
 name = basename(splitext(path)[1])    # Name for the plot
 # Parse geometry from JSON
 geometry_dict = JSON.parse(JSON.parse(replace(read(path, String), "\\n" => ""), dicttype=Dict))
-geometry = generate_from_json(geometry_dict, plot=true, drawn=true);
+geometry, type_information = generate_from_json(geometry_dict, plot=true, drawn=true);
 
 # Analyze the slab to get dimensions
 slab_params = SlabAnalysisParams(
     geometry, 
     slab_name=name,
     slab_type=:uniaxial,
-    vector_1d=[0,1], 
+    vector_1d=[1,0], 
     slab_sizer=:uniform,
     spacing=.1, 
     plot_analysis=true,
@@ -28,21 +29,21 @@ slab_params = SlabAnalysisParams(
 
 # Sizing parameters
 beam_sizing_params = SlabSizingParams(
-    live_load=psf_to_ksi(60), # ksi
-    superimposed_dead_load=psf_to_ksi(20), # ksi
+    live_load=psf_to_ksi(50), # ksi
+    superimposed_dead_load=psf_to_ksi(15), # ksi
     live_factor=1.6, # -
     dead_factor=1.2, # -
-    beam_sizer=:discrete,
+    beam_sizer=:continuous,
     max_depth=40, # in
     beam_units=:in, # in, etc.
     serviceability_lim=360,
     collinear=true,
     minimum_continuous=true,
     n_max_sections=0,
+    slab_dead_load=0,
 );
 
 slab_params = analyze_slab(slab_params);
-
 start_time = time()
 slab_params, beam_sizing_params = optimal_beamsizer(slab_params, beam_sizing_params);
 elapsed_time = time() - start_time
@@ -56,11 +57,13 @@ print_forces(slab_results_discrete_noncollinear)
 slab_results_discrete_collinear = postprocess_slab(slab_params, beam_sizing_params, check_collinear=true);
 print_forces(slab_results_discrete_collinear)
 
-append_results_to_csv("SlabDesignFactors/results/test_results/", "constructability", [slab_results_discrete_noncollinear, slab_results_discrete_collinear])
+fig = plot_slab(slab_params, slab_results_discrete_collinear.sections, text=true, mini=false, background=true, collinear=true)
+
+#append_results_to_csv("SlabDesignFactors/results/test_results/", "constructability", [slab_results_discrete_noncollinear, slab_results_discrete_collinear])
 
 df = assemble_data("SlabDesignFactors/results/test_results/constructability.csv")
 df_slab = filter(row -> row.name == name && row.max_depth == 40 && row.beam_sizer == "discrete", df)
-fig = plot_slab(slab_params, df_slab, text=true, mini=true, background=false, collinear=false)
+fig = plot_slab(slab_params, df_slab, text=true, mini=false, background=false, collinear=false)
 save("SlabDesignFactors/plot/figures/constructability/40/$(name)_mini.pdf", fig)
 
 # ==============================

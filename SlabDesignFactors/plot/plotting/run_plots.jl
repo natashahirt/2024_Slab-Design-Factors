@@ -17,10 +17,20 @@ df_minslabyes = assemble_data("SlabDesignFactors/results/processed_$(deflection)
 df_combined = assemble_data([df_minslabno, df_minslabyes], "slab_min", [false, true])
 slab_filter = row -> row.name == "r1c2" && row.slab_type == "uniaxial" && row.beam_sizer == "discrete" && row.vector_1d_x == 1 && row.vector_1d_y == 0 && row.slab_sizer == "uniform" && row.max_depth == 40 && row.collinear == true && row.slab_min == true
 bau_slab = filter(slab_filter, df_combined)[1,:]
-
 bau_slab.total_ec
 
+min_ec_row = df_combined[argmin(df_combined.total_ec), :]
+min_ec_row.slab_ec
+println(min_ec_row)
+
+(96.2-85.54)/96.2
+
 manufacturable_filter = row -> row.beam_sizer == "discrete" && row.slab_sizer == "uniform" && row.collinear == true && row.slab_min == true
+manufacturable_slabs = filter(manufacturable_filter, df_combined)
+min_ec_row = manufacturable_slabs[argmin(manufacturable_slabs.total_ec), :]
+min_ec_row.total_ec
+println(min_ec_row)
+
 
 manufacturable_slabs = filter(manufacturable_filter, df_combined)
 min_ec = minimum(manufacturable_slabs.total_ec)
@@ -217,3 +227,56 @@ println("Maximum global deflection: $(mean(global_deflections)) in")
 
 clean_csv_data("SlabDesignFactors/results/processed_nodeflection_noslabmin/max_depths.csv")
 clean_csv_data("SlabDesignFactors/results/processed_nodeflection_noslabmin/fix_params.csv")
+
+
+# ==============================
+save_path = "SlabDesignFactors/plot/figures/constrained_inventory/"
+
+df_inventory = assemble_data("SlabDesignFactors/results/constrained_inventory_resized/")
+df_max_depth = assemble_data("SlabDesignFactors/results/constrained_inventory_max_depth/")
+
+fig = plot_mass_against_unique_sections(df_inventory)
+save(save_path * "4_mass_unique_sections.pdf", fig)
+
+fig = plot_mass_against_max_depth(df_max_depth)
+save(save_path * "4_mass_max_depth.pdf", fig)
+
+fig = plot_section_distribution(df_inventory, name="warehouse", max_height=false)
+
+for name in ["office", "school", "warehouse"]
+    fig = plot_section_distribution(df_inventory, name=name, max_height=false)
+    save(save_path * "4_sections_$(name).pdf", fig)
+end
+
+df_filtered = filter(row -> row.max_depth == 25 && row.name == "warehouse", df_max_depth)
+
+# Extract depth and weight from section names using regex
+depths = Float64[]
+weights = Float64[]
+
+# Convert comma-separated string of sections into vector
+sections = split(df_filtered.sections[1], ",")
+# Remove any whitespace and brackets
+sections = strip.(sections)
+sections = replace.(sections, r"[\"\\[\\]]" => "") # Remove quotes and brackets from section names
+sections = replace.(sections, "Any" => "") # Remove Any prefix if present
+sections = replace.(sections, "\"" => "") # Remove Any prefix if present
+
+for section in sections
+    m = match(r"W(\d+)X(\d+)", section)
+    if !isnothing(m)
+        push!(depths, parse(Float64, m[1]))
+        push!(weights, parse(Float64, m[2])) 
+    end
+end
+
+closest_sections = String[]
+for i in 1:lastindex(depths)
+    closest_section = find_closest_section(depths[i], weights[i], available_sections)
+    if isnothing(closest_section)
+        println(row.depth, " ", row.weight)
+    end
+    push!(closest_sections, closest_section.name)
+end
+
+plot_slab(slab_params, closest_sections, text=true, mini=false, background=false, collinear=false, section_names=sections)
