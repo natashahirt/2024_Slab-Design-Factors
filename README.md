@@ -6,3 +6,4 @@ This is the code I used to perform my Master's Research. It takes abstract geome
 2. Tributary Areas: force distribution
 3. Variable Beam Optimization: parallel sizing of steel beams (multivariable problem)
 4. AsapToolkit + AsapOptim: custom versions of Keith J. Lee's Asap extension packages that are updated in accordance with changes in the base Asap distribution.
+5. Projects: miscellaneous extensions
